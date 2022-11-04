@@ -35,6 +35,17 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabControlView = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.checkBoxErp1110_Off = new System.Windows.Forms.CheckBox();
+            this.checkBoxEesOff = new System.Windows.Forms.CheckBox();
+            this.checkBoxErpOff = new System.Windows.Forms.CheckBox();
+            this.buttonLoadRecipe = new System.Windows.Forms.Button();
+            this.buttonNewRecipe = new System.Windows.Forms.Button();
+            this.buttonSavePowerRecipe = new System.Windows.Forms.Button();
+            this.buttonSaveRecipe = new System.Windows.Forms.Button();
+            this.labelNM_PW = new System.Windows.Forms.Label();
+            this.labelRecipePower = new System.Windows.Forms.Label();
+            this.labelRecipe = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
             this.panelIndexView = new System.Windows.Forms.Panel();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -141,6 +152,14 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.buttonUpload = new System.Windows.Forms.Button();
             this.textBoxUploadLotNumber = new System.Windows.Forms.TextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.buttonCopyTable = new System.Windows.Forms.Button();
+            this.panelFinishTest = new System.Windows.Forms.Panel();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.buttonFinshLog = new System.Windows.Forms.Button();
+            this.dataGridViewFinishCopy = new System.Windows.Forms.DataGridView();
+            this.labelWorkingTime = new System.Windows.Forms.Label();
+            this.dataGridViewFinish = new System.Windows.Forms.DataGridView();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.labelMessage = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -196,6 +215,12 @@
             this.dataColumn103 = new System.Data.DataColumn();
             this.dataColumn104 = new System.Data.DataColumn();
             this.dataColumn105 = new System.Data.DataColumn();
+            this.dataColumn115 = new System.Data.DataColumn();
+            this.dataColumn116 = new System.Data.DataColumn();
+            this.dataColumn117 = new System.Data.DataColumn();
+            this.dataColumn118 = new System.Data.DataColumn();
+            this.dataColumn119 = new System.Data.DataColumn();
+            this.dataColumn132 = new System.Data.DataColumn();
             this.dataTable6 = new System.Data.DataTable();
             this.dataColumn26 = new System.Data.DataColumn();
             this.dataColumn27 = new System.Data.DataColumn();
@@ -248,6 +273,14 @@
             this.dataColumn74 = new System.Data.DataColumn();
             this.dataColumn75 = new System.Data.DataColumn();
             this.dataColumn83 = new System.Data.DataColumn();
+            this.dataTable2 = new System.Data.DataTable();
+            this.dataColumn106 = new System.Data.DataColumn();
+            this.dataColumn107 = new System.Data.DataColumn();
+            this.dataColumn108 = new System.Data.DataColumn();
+            this.dataColumn109 = new System.Data.DataColumn();
+            this.dataTable5 = new System.Data.DataTable();
+            this.dataColumn113 = new System.Data.DataColumn();
+            this.dataColumn114 = new System.Data.DataColumn();
             this.timerFinishCheck = new System.Windows.Forms.Timer(this.components);
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -292,12 +325,56 @@
             this.dataColumn87 = new System.Data.DataColumn();
             this.dataColumn88 = new System.Data.DataColumn();
             this.dataColumn89 = new System.Data.DataColumn();
+            this.dataColumn120 = new System.Data.DataColumn();
+            this.dataColumn121 = new System.Data.DataColumn();
+            this.dataColumn122 = new System.Data.DataColumn();
+            this.dataColumn123 = new System.Data.DataColumn();
+            this.dataColumn124 = new System.Data.DataColumn();
             this.timer500msOneShot = new System.Windows.Forms.Timer(this.components);
-            this.dataTable2 = new System.Data.DataTable();
-            this.dataColumn106 = new System.Data.DataColumn();
-            this.dataColumn107 = new System.Data.DataColumn();
-            this.dataColumn108 = new System.Data.DataColumn();
-            this.dataColumn109 = new System.Data.DataColumn();
+            this.dataSetFinish = new System.Data.DataSet();
+            this.dataTable9 = new System.Data.DataTable();
+            this.dataColumn125 = new System.Data.DataColumn();
+            this.dataColumn126 = new System.Data.DataColumn();
+            this.dataColumn127 = new System.Data.DataColumn();
+            this.dataColumn128 = new System.Data.DataColumn();
+            this.dataColumn129 = new System.Data.DataColumn();
+            this.dataColumn130 = new System.Data.DataColumn();
+            this.dataColumn131 = new System.Data.DataColumn();
+            this.dataColumn133 = new System.Data.DataColumn();
+            this.dataColumn134 = new System.Data.DataColumn();
+            this.dataColumn135 = new System.Data.DataColumn();
+            this.dataColumn136 = new System.Data.DataColumn();
+            this.dataColumn137 = new System.Data.DataColumn();
+            this.dataColumn138 = new System.Data.DataColumn();
+            this.dataColumn139 = new System.Data.DataColumn();
+            this.dataColumn140 = new System.Data.DataColumn();
+            this.dataColumn141 = new System.Data.DataColumn();
+            this.dataColumn110 = new System.Data.DataColumn();
+            this.dataColumn111 = new System.Data.DataColumn();
+            this.dataColumn112 = new System.Data.DataColumn();
+            this.dataColumn145 = new System.Data.DataColumn();
+            this.dataColumn146 = new System.Data.DataColumn();
+            this.dataColumn147 = new System.Data.DataColumn();
+            this.dataColumn157 = new System.Data.DataColumn();
+            this.dataColumn161 = new System.Data.DataColumn();
+            this.dataColumn162 = new System.Data.DataColumn();
+            this.dataColumn163 = new System.Data.DataColumn();
+            this.dataColumn172 = new System.Data.DataColumn();
+            this.dataColumn173 = new System.Data.DataColumn();
+            this.dataColumn174 = new System.Data.DataColumn();
+            this.dataColumn175 = new System.Data.DataColumn();
+            this.dataSetPowerRecipe = new System.Data.DataSet();
+            this.dataTable11 = new System.Data.DataTable();
+            this.dataColumn158 = new System.Data.DataColumn();
+            this.dataColumn159 = new System.Data.DataColumn();
+            this.dataColumn185 = new System.Data.DataColumn();
+            this.dataColumn186 = new System.Data.DataColumn();
+            this.dataColumn187 = new System.Data.DataColumn();
+            this.dataColumn190 = new System.Data.DataColumn();
+            this.dataColumn191 = new System.Data.DataColumn();
+            this.newFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.savePowerFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.openPowerRecipeFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.panel1.SuspendLayout();
             this.tabControlView.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -333,6 +410,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.trackBarUVDiffInner)).BeginInit();
             this.panelDebug.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            this.panelFinishTest.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewFinishCopy)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewFinish)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panelResultBase.SuspendLayout();
@@ -346,12 +427,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataTable3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable7)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable5)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataSetOkNg)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataSetTempData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable8)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataTable2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataSetFinish)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable9)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataSetPowerRecipe)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable11)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -363,22 +449,33 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1274, 752);
+            this.panel1.Size = new System.Drawing.Size(1264, 941);
             this.panel1.TabIndex = 0;
             // 
             // tabControlView
             // 
             this.tabControlView.Controls.Add(this.tabPage1);
             this.tabControlView.Controls.Add(this.tabPage2);
-            this.tabControlView.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.tabControlView.Controls.Add(this.tabPage3);
             this.tabControlView.Location = new System.Drawing.Point(0, 263);
             this.tabControlView.Name = "tabControlView";
             this.tabControlView.SelectedIndex = 0;
-            this.tabControlView.Size = new System.Drawing.Size(1264, 685);
+            this.tabControlView.Size = new System.Drawing.Size(1264, 656);
             this.tabControlView.TabIndex = 3;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.checkBoxErp1110_Off);
+            this.tabPage1.Controls.Add(this.checkBoxEesOff);
+            this.tabPage1.Controls.Add(this.checkBoxErpOff);
+            this.tabPage1.Controls.Add(this.buttonLoadRecipe);
+            this.tabPage1.Controls.Add(this.buttonNewRecipe);
+            this.tabPage1.Controls.Add(this.buttonSavePowerRecipe);
+            this.tabPage1.Controls.Add(this.buttonSaveRecipe);
+            this.tabPage1.Controls.Add(this.labelNM_PW);
+            this.tabPage1.Controls.Add(this.labelRecipePower);
+            this.tabPage1.Controls.Add(this.labelRecipe);
+            this.tabPage1.Controls.Add(this.label19);
             this.tabPage1.Controls.Add(this.panelIndexView);
             this.tabPage1.Controls.Add(this.buttonErrorSave);
             this.tabPage1.Controls.Add(this.buttonDeleteResult);
@@ -393,10 +490,134 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1256, 659);
+            this.tabPage1.Size = new System.Drawing.Size(1256, 630);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "설정";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxErp1110_Off
+            // 
+            this.checkBoxErp1110_Off.AutoSize = true;
+            this.checkBoxErp1110_Off.Location = new System.Drawing.Point(374, 433);
+            this.checkBoxErp1110_Off.Name = "checkBoxErp1110_Off";
+            this.checkBoxErp1110_Off.Size = new System.Drawing.Size(151, 16);
+            this.checkBoxErp1110_Off.TabIndex = 216;
+            this.checkBoxErp1110_Off.Text = "작업지시 자동생성 OFF";
+            this.checkBoxErp1110_Off.UseVisualStyleBackColor = true;
+            this.checkBoxErp1110_Off.CheckedChanged += new System.EventHandler(this.checkBoxErp1110_Off_CheckedChanged);
+            // 
+            // checkBoxEesOff
+            // 
+            this.checkBoxEesOff.AutoSize = true;
+            this.checkBoxEesOff.Location = new System.Drawing.Point(450, 470);
+            this.checkBoxEesOff.Name = "checkBoxEesOff";
+            this.checkBoxEesOff.Size = new System.Drawing.Size(75, 16);
+            this.checkBoxEesOff.TabIndex = 214;
+            this.checkBoxEesOff.Text = "EES OFF";
+            this.checkBoxEesOff.UseVisualStyleBackColor = true;
+            this.checkBoxEesOff.CheckedChanged += new System.EventHandler(this.checkBoxEesOff_CheckedChanged);
+            // 
+            // checkBoxErpOff
+            // 
+            this.checkBoxErpOff.AutoSize = true;
+            this.checkBoxErpOff.Location = new System.Drawing.Point(450, 452);
+            this.checkBoxErpOff.Name = "checkBoxErpOff";
+            this.checkBoxErpOff.Size = new System.Drawing.Size(75, 16);
+            this.checkBoxErpOff.TabIndex = 215;
+            this.checkBoxErpOff.Text = "ERP OFF";
+            this.checkBoxErpOff.UseVisualStyleBackColor = true;
+            this.checkBoxErpOff.CheckedChanged += new System.EventHandler(this.checkBoxErpOff_CheckedChanged);
+            // 
+            // buttonLoadRecipe
+            // 
+            this.buttonLoadRecipe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonLoadRecipe.Location = new System.Drawing.Point(118, 492);
+            this.buttonLoadRecipe.Name = "buttonLoadRecipe";
+            this.buttonLoadRecipe.Size = new System.Drawing.Size(101, 34);
+            this.buttonLoadRecipe.TabIndex = 126;
+            this.buttonLoadRecipe.Text = "불러오기";
+            this.buttonLoadRecipe.UseVisualStyleBackColor = true;
+            this.buttonLoadRecipe.Click += new System.EventHandler(this.buttonLoadRecipe_Click);
+            // 
+            // buttonNewRecipe
+            // 
+            this.buttonNewRecipe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonNewRecipe.Location = new System.Drawing.Point(11, 492);
+            this.buttonNewRecipe.Name = "buttonNewRecipe";
+            this.buttonNewRecipe.Size = new System.Drawing.Size(101, 34);
+            this.buttonNewRecipe.TabIndex = 125;
+            this.buttonNewRecipe.Text = "새로만들기";
+            this.buttonNewRecipe.UseVisualStyleBackColor = true;
+            this.buttonNewRecipe.Click += new System.EventHandler(this.buttonNewRecipe_Click);
+            // 
+            // buttonSavePowerRecipe
+            // 
+            this.buttonSavePowerRecipe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonSavePowerRecipe.Location = new System.Drawing.Point(12, 578);
+            this.buttonSavePowerRecipe.Name = "buttonSavePowerRecipe";
+            this.buttonSavePowerRecipe.Size = new System.Drawing.Size(101, 42);
+            this.buttonSavePowerRecipe.TabIndex = 123;
+            this.buttonSavePowerRecipe.Text = "Power Recipe 저장하기";
+            this.buttonSavePowerRecipe.UseVisualStyleBackColor = true;
+            this.buttonSavePowerRecipe.Click += new System.EventHandler(this.buttonSavePowerRecipe_Click);
+            // 
+            // buttonSaveRecipe
+            // 
+            this.buttonSaveRecipe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonSaveRecipe.Location = new System.Drawing.Point(12, 533);
+            this.buttonSaveRecipe.Name = "buttonSaveRecipe";
+            this.buttonSaveRecipe.Size = new System.Drawing.Size(101, 42);
+            this.buttonSaveRecipe.TabIndex = 124;
+            this.buttonSaveRecipe.Text = "Recipe\r\n저장하기";
+            this.buttonSaveRecipe.UseVisualStyleBackColor = true;
+            this.buttonSaveRecipe.Click += new System.EventHandler(this.buttonSaveRecipe_Click);
+            // 
+            // labelNM_PW
+            // 
+            this.labelNM_PW.AutoSize = true;
+            this.labelNM_PW.BackColor = System.Drawing.Color.Yellow;
+            this.labelNM_PW.Font = new System.Drawing.Font("Gulim", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.labelNM_PW.Location = new System.Drawing.Point(10, 446);
+            this.labelNM_PW.Name = "labelNM_PW";
+            this.labelNM_PW.Size = new System.Drawing.Size(101, 16);
+            this.labelNM_PW.TabIndex = 122;
+            this.labelNM_PW.Text = "NAME / PW";
+            // 
+            // labelRecipePower
+            // 
+            this.labelRecipePower.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.labelRecipePower.AutoSize = true;
+            this.labelRecipePower.BackColor = System.Drawing.Color.LawnGreen;
+            this.labelRecipePower.Font = new System.Drawing.Font("Dotum", 20.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.labelRecipePower.Location = new System.Drawing.Point(118, 588);
+            this.labelRecipePower.Name = "labelRecipePower";
+            this.labelRecipePower.Size = new System.Drawing.Size(292, 27);
+            this.labelRecipePower.TabIndex = 121;
+            this.labelRecipePower.Text = "Power 로드 되지 않음";
+            // 
+            // labelRecipe
+            // 
+            this.labelRecipe.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.labelRecipe.AutoSize = true;
+            this.labelRecipe.BackColor = System.Drawing.Color.LawnGreen;
+            this.labelRecipe.Font = new System.Drawing.Font("Dotum", 20.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.labelRecipe.Location = new System.Drawing.Point(118, 548);
+            this.labelRecipe.Name = "labelRecipe";
+            this.labelRecipe.Size = new System.Drawing.Size(301, 27);
+            this.labelRecipe.TabIndex = 120;
+            this.labelRecipe.Text = "Recipe 로드 되지 않음";
+            // 
+            // label19
+            // 
+            this.label19.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label19.AutoSize = true;
+            this.label19.BackColor = System.Drawing.Color.AntiqueWhite;
+            this.label19.Font = new System.Drawing.Font("Dotum", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.label19.Location = new System.Drawing.Point(115, 529);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(156, 16);
+            this.label19.TabIndex = 119;
+            this.label19.Text = "※ 레시피 파일이름";
             // 
             // panelIndexView
             // 
@@ -1522,11 +1743,110 @@
             this.textBoxUploadLotNumber.TabIndex = 2;
             this.textBoxUploadLotNumber.Text = "B2012test-001";
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.buttonCopyTable);
+            this.tabPage3.Controls.Add(this.panelFinishTest);
+            this.tabPage3.Controls.Add(this.buttonFinshLog);
+            this.tabPage3.Controls.Add(this.dataGridViewFinishCopy);
+            this.tabPage3.Controls.Add(this.labelWorkingTime);
+            this.tabPage3.Controls.Add(this.dataGridViewFinish);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(1256, 630);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "결과 Log";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // buttonCopyTable
+            // 
+            this.buttonCopyTable.Location = new System.Drawing.Point(248, 178);
+            this.buttonCopyTable.Name = "buttonCopyTable";
+            this.buttonCopyTable.Size = new System.Drawing.Size(168, 56);
+            this.buttonCopyTable.TabIndex = 131;
+            this.buttonCopyTable.TabStop = false;
+            this.buttonCopyTable.Text = "테이블 복사";
+            this.buttonCopyTable.UseVisualStyleBackColor = true;
+            this.buttonCopyTable.Click += new System.EventHandler(this.buttonCopyTable_Click);
+            // 
+            // panelFinishTest
+            // 
+            this.panelFinishTest.Controls.Add(this.checkBox1);
+            this.panelFinishTest.Enabled = false;
+            this.panelFinishTest.Location = new System.Drawing.Point(422, 91);
+            this.panelFinishTest.Name = "panelFinishTest";
+            this.panelFinishTest.Size = new System.Drawing.Size(356, 150);
+            this.panelFinishTest.TabIndex = 134;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(243, 9);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(83, 16);
+            this.checkBox1.TabIndex = 119;
+            this.checkBox1.Text = "FinishTest";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.Visible = false;
+            // 
+            // buttonFinshLog
+            // 
+            this.buttonFinshLog.Location = new System.Drawing.Point(248, 97);
+            this.buttonFinshLog.Name = "buttonFinshLog";
+            this.buttonFinshLog.Size = new System.Drawing.Size(168, 56);
+            this.buttonFinshLog.TabIndex = 130;
+            this.buttonFinshLog.TabStop = false;
+            this.buttonFinshLog.Text = "작업 마감 및 \r\n\r\n로그 저장, ERP 전송";
+            this.buttonFinshLog.UseVisualStyleBackColor = true;
+            this.buttonFinshLog.Click += new System.EventHandler(this.buttonFinshLog_Click);
+            // 
+            // dataGridViewFinishCopy
+            // 
+            this.dataGridViewFinishCopy.AllowUserToAddRows = false;
+            this.dataGridViewFinishCopy.AllowUserToDeleteRows = false;
+            this.dataGridViewFinishCopy.AllowUserToResizeRows = false;
+            this.dataGridViewFinishCopy.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewFinishCopy.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dataGridViewFinishCopy.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewFinishCopy.Location = new System.Drawing.Point(17, 258);
+            this.dataGridViewFinishCopy.Name = "dataGridViewFinishCopy";
+            this.dataGridViewFinishCopy.RowHeadersVisible = false;
+            this.dataGridViewFinishCopy.RowTemplate.Height = 23;
+            this.dataGridViewFinishCopy.Size = new System.Drawing.Size(1223, 70);
+            this.dataGridViewFinishCopy.TabIndex = 133;
+            // 
+            // labelWorkingTime
+            // 
+            this.labelWorkingTime.AutoSize = true;
+            this.labelWorkingTime.Location = new System.Drawing.Point(15, 241);
+            this.labelWorkingTime.Name = "labelWorkingTime";
+            this.labelWorkingTime.Size = new System.Drawing.Size(61, 12);
+            this.labelWorkingTime.TabIndex = 132;
+            this.labelWorkingTime.Text = "작업시간 :";
+            // 
+            // dataGridViewFinish
+            // 
+            this.dataGridViewFinish.AllowUserToAddRows = false;
+            this.dataGridViewFinish.AllowUserToDeleteRows = false;
+            this.dataGridViewFinish.AllowUserToResizeRows = false;
+            this.dataGridViewFinish.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataGridViewFinish.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dataGridViewFinish.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewFinish.Location = new System.Drawing.Point(17, 14);
+            this.dataGridViewFinish.Name = "dataGridViewFinish";
+            this.dataGridViewFinish.RowHeadersVisible = false;
+            this.dataGridViewFinish.RowTemplate.Height = 23;
+            this.dataGridViewFinish.Size = new System.Drawing.Size(1223, 70);
+            this.dataGridViewFinish.TabIndex = 129;
+            this.dataGridViewFinish.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewFinish_CellValueChanged);
+            // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.labelMessage});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 948);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 919);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1264, 22);
             this.statusStrip1.TabIndex = 2;
@@ -1873,7 +2193,8 @@
             this.dataTable3,
             this.dataTable6,
             this.dataTable7,
-            this.dataTable2});
+            this.dataTable2,
+            this.dataTable5});
             // 
             // dataTable3
             // 
@@ -1897,7 +2218,13 @@
             this.dataColumn102,
             this.dataColumn103,
             this.dataColumn104,
-            this.dataColumn105});
+            this.dataColumn105,
+            this.dataColumn115,
+            this.dataColumn116,
+            this.dataColumn117,
+            this.dataColumn118,
+            this.dataColumn119,
+            this.dataColumn132});
             this.dataTable3.TableName = "fixedBackup";
             // 
             // dataColumn2
@@ -2005,6 +2332,40 @@
             // 
             this.dataColumn105.ColumnName = "Gamma2";
             this.dataColumn105.DataType = typeof(double);
+            // 
+            // dataColumn115
+            // 
+            this.dataColumn115.ColumnName = "lotStartTime";
+            this.dataColumn115.DefaultValue = "";
+            // 
+            // dataColumn116
+            // 
+            this.dataColumn116.ColumnName = "lastChecksheetNumber";
+            this.dataColumn116.DefaultValue = "";
+            // 
+            // dataColumn117
+            // 
+            this.dataColumn117.ColumnName = "bErpOff";
+            this.dataColumn117.DataType = typeof(bool);
+            this.dataColumn117.DefaultValue = true;
+            // 
+            // dataColumn118
+            // 
+            this.dataColumn118.ColumnName = "bEesOff";
+            this.dataColumn118.DataType = typeof(bool);
+            this.dataColumn118.DefaultValue = false;
+            // 
+            // dataColumn119
+            // 
+            this.dataColumn119.ColumnName = "bErp1110_Off";
+            this.dataColumn119.DataType = typeof(bool);
+            this.dataColumn119.DefaultValue = "True";
+            // 
+            // dataColumn132
+            // 
+            this.dataColumn132.ColumnName = "bUseNetwork";
+            this.dataColumn132.DataType = typeof(bool);
+            this.dataColumn132.DefaultValue = true;
             // 
             // dataTable6
             // 
@@ -2366,6 +2727,56 @@
             this.dataColumn83.DataType = typeof(int);
             this.dataColumn83.DefaultValue = 100;
             // 
+            // dataTable2
+            // 
+            this.dataTable2.Columns.AddRange(new System.Data.DataColumn[] {
+            this.dataColumn106,
+            this.dataColumn107,
+            this.dataColumn108,
+            this.dataColumn109});
+            this.dataTable2.TableName = "roiCam";
+            // 
+            // dataColumn106
+            // 
+            this.dataColumn106.ColumnName = "roiLeft";
+            this.dataColumn106.DataType = typeof(int);
+            this.dataColumn106.DefaultValue = 10;
+            // 
+            // dataColumn107
+            // 
+            this.dataColumn107.ColumnName = "roiTop";
+            this.dataColumn107.DataType = typeof(int);
+            this.dataColumn107.DefaultValue = 10;
+            // 
+            // dataColumn108
+            // 
+            this.dataColumn108.ColumnName = "roiWidth";
+            this.dataColumn108.DataType = typeof(int);
+            this.dataColumn108.DefaultValue = 100;
+            // 
+            // dataColumn109
+            // 
+            this.dataColumn109.ColumnName = "roiHeight";
+            this.dataColumn109.DataType = typeof(int);
+            this.dataColumn109.DefaultValue = 100;
+            // 
+            // dataTable5
+            // 
+            this.dataTable5.Columns.AddRange(new System.Data.DataColumn[] {
+            this.dataColumn113,
+            this.dataColumn114});
+            this.dataTable5.TableName = "sql";
+            // 
+            // dataColumn113
+            // 
+            this.dataColumn113.ColumnName = "GetProjectNo1";
+            this.dataColumn113.DefaultValue = "SELECT DBO.fnCodeNo(\'WI_PR1123\', getdate())";
+            // 
+            // dataColumn114
+            // 
+            this.dataColumn114.ColumnName = "SmInspectDefect";
+            this.dataColumn114.DefaultValue = "exec ems_sp_selectsSmInspectDefect";
+            // 
             // timerFinishCheck
             // 
             this.timerFinishCheck.Enabled = true;
@@ -2478,7 +2889,12 @@
             this.dataColumn86,
             this.dataColumn87,
             this.dataColumn88,
-            this.dataColumn89});
+            this.dataColumn89,
+            this.dataColumn120,
+            this.dataColumn121,
+            this.dataColumn122,
+            this.dataColumn123,
+            this.dataColumn124});
             this.dataTable8.TableName = "tempBackup";
             // 
             // dataColumn20
@@ -2643,54 +3059,354 @@
             this.dataColumn89.DataType = typeof(int);
             this.dataColumn89.DefaultValue = 0;
             // 
+            // dataColumn120
+            // 
+            this.dataColumn120.ColumnName = "Ct";
+            this.dataColumn120.DataType = typeof(int);
+            this.dataColumn120.DefaultValue = 0;
+            // 
+            // dataColumn121
+            // 
+            this.dataColumn121.ColumnName = "DisplayNG_CT";
+            this.dataColumn121.DataType = typeof(int);
+            this.dataColumn121.DefaultValue = 0;
+            // 
+            // dataColumn122
+            // 
+            this.dataColumn122.ColumnName = "DisplayNG_Empty1";
+            this.dataColumn122.DataType = typeof(int);
+            this.dataColumn122.DefaultValue = 0;
+            // 
+            // dataColumn123
+            // 
+            this.dataColumn123.ColumnName = "DisplayNG_Empty2";
+            this.dataColumn123.DataType = typeof(int);
+            this.dataColumn123.DefaultValue = 0;
+            // 
+            // dataColumn124
+            // 
+            this.dataColumn124.ColumnName = "RecipeName";
+            this.dataColumn124.DefaultValue = "";
+            // 
             // timer500msOneShot
             // 
             this.timer500msOneShot.Interval = 500;
             this.timer500msOneShot.Tick += new System.EventHandler(this.timer500msOneShot_Tick);
             // 
-            // dataTable2
+            // dataSetFinish
             // 
-            this.dataTable2.Columns.AddRange(new System.Data.DataColumn[] {
-            this.dataColumn106,
-            this.dataColumn107,
-            this.dataColumn108,
-            this.dataColumn109});
-            this.dataTable2.TableName = "roiCam";
+            this.dataSetFinish.DataSetName = "IptVisionPlus";
+            this.dataSetFinish.Tables.AddRange(new System.Data.DataTable[] {
+            this.dataTable9});
             // 
-            // dataColumn106
+            // dataTable9
             // 
-            this.dataColumn106.ColumnName = "roiLeft";
-            this.dataColumn106.DataType = typeof(int);
-            this.dataColumn106.DefaultValue = 10;
+            this.dataTable9.Columns.AddRange(new System.Data.DataColumn[] {
+            this.dataColumn125,
+            this.dataColumn126,
+            this.dataColumn127,
+            this.dataColumn128,
+            this.dataColumn129,
+            this.dataColumn130,
+            this.dataColumn131,
+            this.dataColumn133,
+            this.dataColumn134,
+            this.dataColumn135,
+            this.dataColumn136,
+            this.dataColumn137,
+            this.dataColumn138,
+            this.dataColumn139,
+            this.dataColumn140,
+            this.dataColumn141,
+            this.dataColumn110,
+            this.dataColumn111,
+            this.dataColumn112,
+            this.dataColumn145,
+            this.dataColumn146,
+            this.dataColumn147,
+            this.dataColumn157,
+            this.dataColumn161,
+            this.dataColumn162,
+            this.dataColumn163,
+            this.dataColumn172,
+            this.dataColumn173,
+            this.dataColumn174,
+            this.dataColumn175});
+            this.dataTable9.TableName = "Finish";
             // 
-            // dataColumn107
+            // dataColumn125
             // 
-            this.dataColumn107.ColumnName = "roiTop";
-            this.dataColumn107.DataType = typeof(int);
-            this.dataColumn107.DefaultValue = 10;
+            this.dataColumn125.Caption = "호기번호";
+            this.dataColumn125.ColumnName = "mcName";
+            this.dataColumn125.DefaultValue = "";
             // 
-            // dataColumn108
+            // dataColumn126
             // 
-            this.dataColumn108.ColumnName = "roiWidth";
-            this.dataColumn108.DataType = typeof(int);
-            this.dataColumn108.DefaultValue = 100;
+            this.dataColumn126.Caption = "체크시트번호";
+            this.dataColumn126.ColumnName = "checksheetNumber";
+            this.dataColumn126.DefaultValue = "";
             // 
-            // dataColumn109
+            // dataColumn127
             // 
-            this.dataColumn109.ColumnName = "roiHeight";
-            this.dataColumn109.DataType = typeof(int);
-            this.dataColumn109.DefaultValue = 100;
+            this.dataColumn127.Caption = "품목코드";
+            this.dataColumn127.ColumnName = "GDCD";
+            this.dataColumn127.DefaultValue = "";
+            // 
+            // dataColumn128
+            // 
+            this.dataColumn128.Caption = "품명";
+            this.dataColumn128.ColumnName = "GDNM";
+            this.dataColumn128.DefaultValue = "";
+            // 
+            // dataColumn129
+            // 
+            this.dataColumn129.Caption = "파워";
+            this.dataColumn129.ColumnName = "POWER";
+            this.dataColumn129.DefaultValue = "";
+            // 
+            // dataColumn130
+            // 
+            this.dataColumn130.Caption = "투입수";
+            this.dataColumn130.ColumnName = "PR_QTY";
+            this.dataColumn130.DataType = typeof(int);
+            this.dataColumn130.DefaultValue = 0;
+            // 
+            // dataColumn131
+            // 
+            this.dataColumn131.Caption = "양품생산량 (파렛트 배출수)";
+            this.dataColumn131.ColumnName = "COUNT_OK";
+            this.dataColumn131.DataType = typeof(int);
+            this.dataColumn131.DefaultValue = 0;
+            // 
+            // dataColumn133
+            // 
+            this.dataColumn133.Caption = "엣지기포";
+            this.dataColumn133.ColumnName = "COUNT_EDGE_BUBBLE";
+            this.dataColumn133.DataType = typeof(int);
+            this.dataColumn133.DefaultValue = 0;
+            // 
+            // dataColumn134
+            // 
+            this.dataColumn134.Caption = "파손";
+            this.dataColumn134.ColumnName = "COUNT_DEFECT";
+            this.dataColumn134.DataType = typeof(int);
+            this.dataColumn134.DefaultValue = 0;
+            // 
+            // dataColumn135
+            // 
+            this.dataColumn135.Caption = "뜯김";
+            this.dataColumn135.ColumnName = "COUNT_DK";
+            this.dataColumn135.DataType = typeof(int);
+            this.dataColumn135.DefaultValue = 0;
+            // 
+            // dataColumn136
+            // 
+            this.dataColumn136.Caption = "실";
+            this.dataColumn136.ColumnName = "COUNT_SIL";
+            this.dataColumn136.DataType = typeof(int);
+            this.dataColumn136.DefaultValue = 0;
+            // 
+            // dataColumn137
+            // 
+            this.dataColumn137.Caption = "C.T편차";
+            this.dataColumn137.ColumnName = "COUNT_CT";
+            this.dataColumn137.DataType = typeof(int);
+            this.dataColumn137.DefaultValue = 0;
+            // 
+            // dataColumn138
+            // 
+            this.dataColumn138.Caption = "P.W편차";
+            this.dataColumn138.ColumnName = "COUNT_PW";
+            this.dataColumn138.DataType = typeof(int);
+            this.dataColumn138.DefaultValue = 0;
+            // 
+            // dataColumn139
+            // 
+            this.dataColumn139.Caption = "상/하분리";
+            this.dataColumn139.ColumnName = "COUNT_UPDOWN";
+            this.dataColumn139.DataType = typeof(int);
+            this.dataColumn139.DefaultValue = 0;
+            // 
+            // dataColumn140
+            // 
+            this.dataColumn140.Caption = "착오수량";
+            this.dataColumn140.ColumnName = "COUNT_ERROR";
+            this.dataColumn140.DataType = typeof(int);
+            this.dataColumn140.DefaultValue = 0;
+            // 
+            // dataColumn141
+            // 
+            this.dataColumn141.Caption = "불량합계";
+            this.dataColumn141.ColumnName = "COUNT_NG";
+            this.dataColumn141.DataType = typeof(int);
+            this.dataColumn141.DefaultValue = 0;
+            // 
+            // dataColumn110
+            // 
+            this.dataColumn110.Caption = "사용안함";
+            this.dataColumn110.ColumnName = "COUNT_NONE";
+            this.dataColumn110.DataType = typeof(int);
+            this.dataColumn110.DefaultValue = 0;
+            // 
+            // dataColumn111
+            // 
+            this.dataColumn111.Caption = "미분리";
+            this.dataColumn111.ColumnName = "COUNT_EMPTY1";
+            this.dataColumn111.DataType = typeof(int);
+            this.dataColumn111.DefaultValue = 0;
+            // 
+            // dataColumn112
+            // 
+            this.dataColumn112.Caption = "유실";
+            this.dataColumn112.ColumnName = "COUNT_EMPTY2";
+            this.dataColumn112.DataType = typeof(int);
+            this.dataColumn112.DefaultValue = 0;
+            // 
+            // dataColumn145
+            // 
+            this.dataColumn145.ColumnName = "plcQty";
+            this.dataColumn145.DataType = typeof(int);
+            this.dataColumn145.DefaultValue = 0;
+            // 
+            // dataColumn146
+            // 
+            this.dataColumn146.ColumnName = "plcOk";
+            this.dataColumn146.DataType = typeof(int);
+            this.dataColumn146.DefaultValue = 0;
+            // 
+            // dataColumn147
+            // 
+            this.dataColumn147.ColumnName = "plcNg";
+            this.dataColumn147.DataType = typeof(int);
+            this.dataColumn147.DefaultValue = 0;
+            // 
+            // dataColumn157
+            // 
+            this.dataColumn157.ColumnName = "etc";
+            // 
+            // dataColumn161
+            // 
+            this.dataColumn161.ColumnName = "PR_NO";
+            this.dataColumn161.DefaultValue = "";
+            // 
+            // dataColumn162
+            // 
+            this.dataColumn162.ColumnName = "PS_CD";
+            this.dataColumn162.DefaultValue = "";
+            // 
+            // dataColumn163
+            // 
+            this.dataColumn163.ColumnName = "JOB_NO";
+            this.dataColumn163.DefaultValue = "";
+            // 
+            // dataColumn172
+            // 
+            this.dataColumn172.ColumnName = "NG_BUBBLE_QTY";
+            this.dataColumn172.DataType = typeof(int);
+            this.dataColumn172.DefaultValue = 0;
+            // 
+            // dataColumn173
+            // 
+            this.dataColumn173.ColumnName = "NG_REACTION_QTY";
+            this.dataColumn173.DataType = typeof(int);
+            this.dataColumn173.DefaultValue = 0;
+            // 
+            // dataColumn174
+            // 
+            this.dataColumn174.ColumnName = "NG_PRINT_QTY";
+            this.dataColumn174.DataType = typeof(int);
+            this.dataColumn174.DefaultValue = 0;
+            // 
+            // dataColumn175
+            // 
+            this.dataColumn175.ColumnName = "NG_SEPARATION_QTY";
+            this.dataColumn175.DataType = typeof(int);
+            this.dataColumn175.DefaultValue = 0;
+            // 
+            // dataSetPowerRecipe
+            // 
+            this.dataSetPowerRecipe.DataSetName = "IptVisionPlus";
+            this.dataSetPowerRecipe.Tables.AddRange(new System.Data.DataTable[] {
+            this.dataTable11});
+            // 
+            // dataTable11
+            // 
+            this.dataTable11.Columns.AddRange(new System.Data.DataColumn[] {
+            this.dataColumn158,
+            this.dataColumn159,
+            this.dataColumn185,
+            this.dataColumn186,
+            this.dataColumn187,
+            this.dataColumn190,
+            this.dataColumn191});
+            this.dataTable11.TableName = "PowerParameter";
+            // 
+            // dataColumn158
+            // 
+            this.dataColumn158.ColumnName = "devTh";
+            this.dataColumn158.DataType = typeof(double);
+            this.dataColumn158.DefaultValue = 0.46D;
+            // 
+            // dataColumn159
+            // 
+            this.dataColumn159.ColumnName = "lumDiffTh";
+            this.dataColumn159.DataType = typeof(int);
+            this.dataColumn159.DefaultValue = 14;
+            // 
+            // dataColumn185
+            // 
+            this.dataColumn185.ColumnName = "uvLumLowTh";
+            this.dataColumn185.DataType = typeof(int);
+            this.dataColumn185.DefaultValue = 0;
+            // 
+            // dataColumn186
+            // 
+            this.dataColumn186.ColumnName = "uvLumHighTh";
+            this.dataColumn186.DataType = typeof(int);
+            this.dataColumn186.DefaultValue = 0;
+            // 
+            // dataColumn187
+            // 
+            this.dataColumn187.ColumnName = "bUVLowHigh";
+            this.dataColumn187.DataType = typeof(bool);
+            this.dataColumn187.DefaultValue = false;
+            // 
+            // dataColumn190
+            // 
+            this.dataColumn190.ColumnName = "bBubbleTest";
+            this.dataColumn190.DataType = typeof(bool);
+            this.dataColumn190.DefaultValue = false;
+            // 
+            // dataColumn191
+            // 
+            this.dataColumn191.ColumnName = "bubbleTestValue";
+            this.dataColumn191.DataType = typeof(double);
+            this.dataColumn191.DefaultValue = 0D;
+            // 
+            // newFileDialog1
+            // 
+            this.newFileDialog1.Filter = "파라미터 파일|*.par";
+            // 
+            // savePowerFileDialog1
+            // 
+            this.savePowerFileDialog1.Filter = "파워 파라미터 파일|*.pow";
+            // 
+            // openPowerRecipeFileDialog
+            // 
+            this.openPowerRecipeFileDialog.FileName = "openFileDialog1";
+            this.openPowerRecipeFileDialog.Filter = "파워 파라미터 파일|*.pow";
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1274, 752);
+            this.ClientSize = new System.Drawing.Size(1264, 941);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormMain";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "IptVisionLucam";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             this.Load += new System.EventHandler(this.FormMain_Load);
@@ -2737,6 +3453,12 @@
             this.panelDebug.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            this.panelFinishTest.ResumeLayout(false);
+            this.panelFinishTest.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewFinishCopy)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewFinish)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -2755,12 +3477,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataTable3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable6)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable7)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable5)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataSetOkNg)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataSetTempData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataTable8)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataTable2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataSetFinish)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable9)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataSetPowerRecipe)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataTable11)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -3033,6 +3760,83 @@
         private System.Data.DataColumn dataColumn107;
         private System.Data.DataColumn dataColumn108;
         private System.Data.DataColumn dataColumn109;
+        private System.Data.DataSet dataSetFinish;
+        private System.Data.DataTable dataTable9;
+        private System.Data.DataColumn dataColumn125;
+        private System.Data.DataColumn dataColumn126;
+        private System.Data.DataColumn dataColumn127;
+        private System.Data.DataColumn dataColumn128;
+        private System.Data.DataColumn dataColumn129;
+        private System.Data.DataColumn dataColumn130;
+        private System.Data.DataColumn dataColumn131;
+        private System.Data.DataColumn dataColumn133;
+        private System.Data.DataColumn dataColumn134;
+        private System.Data.DataColumn dataColumn135;
+        private System.Data.DataColumn dataColumn136;
+        private System.Data.DataColumn dataColumn137;
+        private System.Data.DataColumn dataColumn138;
+        private System.Data.DataColumn dataColumn139;
+        private System.Data.DataColumn dataColumn140;
+        private System.Data.DataColumn dataColumn141;
+        private System.Data.DataColumn dataColumn110;
+        private System.Data.DataColumn dataColumn111;
+        private System.Data.DataColumn dataColumn112;
+        private System.Data.DataColumn dataColumn145;
+        private System.Data.DataColumn dataColumn146;
+        private System.Data.DataColumn dataColumn147;
+        private System.Data.DataColumn dataColumn157;
+        private System.Data.DataColumn dataColumn161;
+        private System.Data.DataColumn dataColumn162;
+        private System.Data.DataColumn dataColumn163;
+        private System.Data.DataColumn dataColumn172;
+        private System.Data.DataColumn dataColumn173;
+        private System.Data.DataColumn dataColumn174;
+        private System.Data.DataColumn dataColumn175;
+        private System.Windows.Forms.Label labelRecipePower;
+        private System.Windows.Forms.Label labelRecipe;
+        private System.Windows.Forms.Label label19;
+        private System.Data.DataSet dataSetPowerRecipe;
+        private System.Data.DataTable dataTable11;
+        private System.Data.DataColumn dataColumn158;
+        private System.Data.DataColumn dataColumn159;
+        private System.Data.DataColumn dataColumn185;
+        private System.Data.DataColumn dataColumn186;
+        private System.Data.DataColumn dataColumn187;
+        private System.Data.DataColumn dataColumn190;
+        private System.Data.DataColumn dataColumn191;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button buttonCopyTable;
+        private System.Windows.Forms.Panel panelFinishTest;
+        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.Button buttonFinshLog;
+        private System.Windows.Forms.DataGridView dataGridViewFinishCopy;
+        private System.Windows.Forms.Label labelWorkingTime;
+        private System.Windows.Forms.DataGridView dataGridViewFinish;
+        private System.Windows.Forms.Label labelNM_PW;
+        private System.Data.DataTable dataTable5;
+        private System.Data.DataColumn dataColumn113;
+        private System.Data.DataColumn dataColumn114;
+        private System.Data.DataColumn dataColumn115;
+        private System.Data.DataColumn dataColumn116;
+        private System.Data.DataColumn dataColumn117;
+        private System.Data.DataColumn dataColumn118;
+        private System.Data.DataColumn dataColumn119;
+        private System.Data.DataColumn dataColumn120;
+        private System.Data.DataColumn dataColumn121;
+        private System.Data.DataColumn dataColumn122;
+        private System.Data.DataColumn dataColumn123;
+        private System.Data.DataColumn dataColumn124;
+        private System.Windows.Forms.Button buttonLoadRecipe;
+        private System.Windows.Forms.Button buttonNewRecipe;
+        private System.Windows.Forms.Button buttonSavePowerRecipe;
+        private System.Windows.Forms.Button buttonSaveRecipe;
+        private System.Windows.Forms.SaveFileDialog newFileDialog1;
+        private System.Windows.Forms.SaveFileDialog savePowerFileDialog1;
+        private System.Windows.Forms.OpenFileDialog openPowerRecipeFileDialog;
+        private System.Windows.Forms.CheckBox checkBoxErp1110_Off;
+        private System.Windows.Forms.CheckBox checkBoxEesOff;
+        private System.Windows.Forms.CheckBox checkBoxErpOff;
+        private System.Data.DataColumn dataColumn132;
     }
 }
 

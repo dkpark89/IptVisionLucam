@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -35,30 +36,30 @@ namespace IptVisionLucam
         private string m_tempDir = "";
         private string m_uploadDir = "";
         private string m_errorDir = "";
-        private int cntAll = 0;
-        private int cntOk = 0;
-        private int cntNg = 0;
-        private int cntNoLenz1 = 0;
-        private int cntNoLenz2 = 0;
-        private int cntOK1 = 0;
-        private int cntOK2 = 0;
-        private int cntBubble = 0;
-        private int cntDefeat1 = 0;
-        private int cntDefeat2 = 0;
-        private int cntPaint = 0;
-        private int cntEdge = 0;
-        private int cntSil = 0;
-        private int cntDK = 0;
-        private int cntTop = 0;
+        //private int cntAll = 0;
+        //private int cntOk = 0;
+        //private int cntNg = 0;
+        //private int cntNoLenz1 = 0;
+        //private int cntNoLenz2 = 0;
+        //private int cntOK1 = 0;
+        //private int cntOK2 = 0;
+        //private int cntBubble = 0;
+        //private int cntDefeat1 = 0;
+        //private int cntDefeat2 = 0;
+        //private int cntPaint = 0;
+        //private int cntEdge = 0;
+        //private int cntSil = 0;
+        //private int cntDK = 0;
+        //private int cntTop = 0;
         private int[] curNG = new int[2] { Constants.NG_NO_LENZ, Constants.NG_NO_LENZ };
         private int[] prevNG = new int[2] { Constants.NG_NO_LENZ, Constants.NG_NO_LENZ };
-        private int cntDisplayNG_Bubble = 0;
-        private int cntDisplayNG_Defeat = 0;
-        private int cntDisplayNG_DK = 0;
-        private int cntDisplayNG_Sil = 0;
-        private int cntDisplayNG_None = 0;
+        //private int cntDisplayNG_Bubble = 0;
+        //private int cntDisplayNG_Defeat = 0;
+        //private int cntDisplayNG_DK = 0;
+        //private int cntDisplayNG_Sil = 0;
+        //private int cntDisplayNG_None = 0;
 
-        private int cntTotalUpload = 0;
+        //private int cntTotalUpload = 0;
         private int selectViewResult = 0;
         private int selectViewResultIndex = 0;
         private int[] cnt = new int[2] { 0, 0 };
@@ -105,7 +106,21 @@ namespace IptVisionLucam
         private Automation.BDaq.InstantDoCtrl instantDoCtrl1;
         private Automation.BDaq.InstantDiCtrl instantDiCtrl1;
         DataRowCollection drcRoi = null;
+        DataRow drSystem = null;
+        DataRow drCounter = null;
+        private string CurrentFileName = "";
+        private bool bJobChange = false;
+        private bool bWorkDone = false;
+        bool bUseNetwork = false;
+        bool bInFinish = false;
         #endregion "variables"
+
+
+
+        const string strConnectionERP = @"Data Source=192.168.2.5;Initial Catalog=ERP_2;Persist Security Info=True;User ID=sa;Password=inter07@";
+        //const string strConnectionEES = @"Data Source=192.168.2.203;Initial Catalog=InterojoSmartEES;Persist Security Info=True;User ID=sa;Password=fntps!250";
+        const string strConnectionEES = @"Data Source=192.168.2.203;Initial Catalog=InterojoSmartEES;Persist Security Info=True;User ID=micube;Password=EES#%DB!@";
+
 
         #region "ThreadCode"
         Queue<Dictionary<string, object>> upLoadQueue = new Queue<Dictionary<string, object>>();
@@ -233,18 +248,19 @@ namespace IptVisionLucam
                         {
                             if (curNG[id] == 0)
                             {
-                                cntOK1++;
+                                drCounter["OK1"] = (int)drCounter["OK1"] + 1;
                             }
                             else if (curNG[id] == Constants.NG_NO_LENZ)
                             {
-                                cntNoLenz1++;
+                                drCounter["NoLenz1"] = (int)drCounter["NoLenz1"] + 1;
                             }
                             else
                             {
-                                if ((curNG[id] & Constants.NG_BUBBLE) != 0) cntBubble++;
-                                if ((curNG[id] & Constants.NG_DEFEAT) != 0) cntDefeat1++;
-                                if ((curNG[id] & Constants.NG_EDGE) != 0) cntEdge++;
-                                if ((curNG[id] & Constants.NG_PAINT) != 0) cntPaint++;
+                                if ((curNG[id] & Constants.NG_BUBBLE) != 0) drCounter["Bubble"] = (int)drCounter["Bubble"] + 1;
+                                if ((curNG[id] & Constants.NG_DEFEAT) != 0) drCounter["Defeat1"] = (int)drCounter["Defeat1"] + 1;
+                                if ((curNG[id] & Constants.NG_PAINT) != 0) drCounter["Paint"] = (int)drCounter["Paint"] + 1;
+                                if ((curNG[id] & Constants.NG_EDGE) != 0) drCounter["Edge"] = (int)drCounter["Edge"] + 1;
+                                if ((curNG[id] & Constants.NG_CT) != 0) drCounter["Ct"] = (int)drCounter["Ct"] + 1;
                             }
                         }
                     }
@@ -265,7 +281,7 @@ namespace IptVisionLucam
                     //labelSen1.InvokeIfNeeded(() => labelSen1.Text = "자외선차이=" + centerTest[id].UvDiff1.ToString() + "/" + centerTest[id].UvDiff2.ToString() + " [" + centerTest[id].C1 + "/" + centerTest[id].C2 + "/" + centerTest[id].C3 + "]");
                     string str = "(" + StageIndex + "/12)";
                     labelSen1.InvokeIfNeeded(() => labelSen1.Text = str + " [" + centerTest[id].C1 + "/" + centerTest[id].C2 + "/" + centerTest[id].C3 + "]");
-                    PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + cntAll.ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
+                    PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + drCounter["cntOk"].ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
                     DataRow dr = dataSetBackup.Tables["centerParameter"].Rows[0];
                     PutText(ref cvBufferCam[id], "diffTh=" + dr["diffTh"].ToString() + "/colorIn=" + dr["colorInner"].ToString() + "/colorOut" + dr["colorOuter"].ToString(), false, 30, 60);
                     PutText(ref cvBufferCam[id], dr["colorUnderprint"].ToString() + "/" + dr["lumDiffTh"].ToString() + "/" + dr["devTh"].ToString(), false, 30, 90);
@@ -275,18 +291,18 @@ namespace IptVisionLucam
                     PutText(ref cvBufferCam[id], Properties.Resources.VERSION, false, 30, 210);
                     if (!bDemo)
                     {
-                        cvBufferCam[id].SaveImage(m_tempDir + @"\Org1-" + (cntAll).ToString("000000") + ".jpg");
+                        cvBufferCam[id].SaveImage(m_tempDir + @"\Org1-" + ((int)drCounter["cntOk"]).ToString("000000") + ".jpg");
                         try
                         {
-                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + (cntAll).ToString("000000") + ".jpg");
+                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + ((int)drCounter["cntOk"]).ToString("000000") + ".jpg");
                         }
                         catch (InvalidOperationException)
                         {
                             Thread.Sleep(100);
-                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + (cntAll).ToString("000000") + ".jpg");
+                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + ((int)drCounter["cntOk"]).ToString("000000") + ".jpg");
                         }
                         pictureBoxCam1.InvokeIfNeeded(() => pictureBoxCam1.Image = iu.resizeImage(cvBufferCam[id], pictureBoxCam1.Size));
-                        pictureBoxResult1.Tag = (int)(cntAll);
+                        pictureBoxResult1.Tag = (int)drCounter["cntOk"];
                     }
                     else
                     {
@@ -348,7 +364,7 @@ namespace IptVisionLucam
                 }
                 else
                 {
-                    if (cntAll > 2 || bDemo)
+                    if ((int)drCounter["count"] > 2 || bDemo)
                     {
                         curNG[id] = checkCameraBoundary(ref boundaryTest[id - 1], cvBufferCam[id], ref dataSetBackup, ref eStatusCam[id]);
                         if (!bDemo)
@@ -358,18 +374,18 @@ namespace IptVisionLucam
                             {
                                 if (curNG[id] == 0)
                                 {
-                                    cntOK2++;
+                                    drCounter["OK2"] = (int)drCounter["OK2"] + 1;
                                 }
                                 else if (curNG[id] == Constants.NG_NO_LENZ)
                                 {
-                                    cntNoLenz2++;
+                                    drCounter["NoLenz2"] = (int)drCounter["NoLenz2"] + 1;
                                 }
                                 else
                                 {
-                                    if ((curNG[id] & Constants.NG_DEFEAT) != 0) cntDefeat2++;
-                                    if ((curNG[id] & Constants.NG_SIL) != 0) cntSil++;
-                                    if ((curNG[id] & Constants.NG_DK) != 0) cntDK++;
-                                    if ((curNG[id] & Constants.NG_TOP) != 0) cntTop++;
+                                    if ((curNG[id] & Constants.NG_DEFEAT) != 0) drCounter["Defeat2"] = (int)drCounter["Defeat2"] + 1;
+                                    if ((curNG[id] & Constants.NG_DK) != 0) drCounter["DK"] = (int)drCounter["DK"] + 1;
+                                    if ((curNG[id] & Constants.NG_SIL) != 0) drCounter["Sil"] = (int)drCounter["Sil"] + 1;
+                                    if ((curNG[id] & Constants.NG_TOP) != 0) drCounter["TOP"] = (int)drCounter["TOP"] + 1;
                                 }
                             }
                         }
@@ -391,7 +407,7 @@ namespace IptVisionLucam
                         string str = "(" + index + "/12)";
                         //labelSen2.InvokeIfNeeded(() => labelSen2.Text = "[" + boundaryTest[id - 1].C1 + "/" + boundaryTest[id - 1].C2 + "/" + boundaryTest[id - 1].C3 + "][" + boundaryTest[id - 1].RoundDiff.ToString("0") + "]");
                         labelSen2.InvokeIfNeeded(() => labelSen2.Text = str + "[" + boundaryTest[id - 1].C1 + "/" + boundaryTest[id - 1].C2 + "/" + boundaryTest[id - 1].C3 + "][" + boundaryTest[id - 1].RoundDiff.ToString("0") + "]");
-                        PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + cntAll.ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
+                        PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + drCounter["cntOk"].ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
 
                         DataRow dr = dataSetBackup.Tables["boundaryParameter"].Rows[0];
                         PutText(ref cvBufferCam[id], dr["cannyParameter1"].ToString() + "/" + dr["cannyParameter2"].ToString() + "/" + dr["diffTh"].ToString(), false, 30, 60);
@@ -400,17 +416,17 @@ namespace IptVisionLucam
                         PutText(ref cvBufferCam[id], Properties.Resources.VERSION, false, 30, 150);
                         if (!bDemo)
                         {
-                            cvBufferCam[id].SaveImage(m_tempDir + @"\Org2-" + (cntAll - 2).ToString("000000") + ".jpg");
+                            cvBufferCam[id].SaveImage(m_tempDir + @"\Org2-" + ((int)drCounter["cntOk"] - 2).ToString("000000") + ".jpg");
                             try
                             {
-                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + (cntAll - 2).ToString("000000") + ".jpg");
+                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + ((int)drCounter["cntOk"] - 2).ToString("000000") + ".jpg");
                             }
                             catch (InvalidOperationException)
                             {
                                 Thread.Sleep(100);
-                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + (cntAll - 2).ToString("000000") + ".jpg");
+                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + ((int)drCounter["cntOk"] - 2).ToString("000000") + ".jpg");
                             }
-                            pictureBoxResult2.Tag = (int)(cntAll - 2);
+                            pictureBoxResult2.Tag = (int)((int)drCounter["cntOk"] - 2);
                         }
                         else
                         {
@@ -709,7 +725,7 @@ namespace IptVisionLucam
             try
             {
                 string strCode = "";
-                int cntAllIndex = cntAll;
+                int cntAllIndex = (int)drCounter["cntOk"];
                 try
                 {
                     int p1 = 0, p2 = 0, aa, bb;
@@ -755,9 +771,9 @@ namespace IptVisionLucam
                         if (strCode.Equals("OK OK"))
                         {
                             DataRow dr = dataSetOkNg.Tables["ok"].NewRow();
-                            cntOk++;
+                            drCounter["cntOk"] = (int)drCounter["cntOk"] + 1;
                             cell = new DataGridViewTextBoxCell();
-                            cell.Value = "양품-" + cntOk.ToString();
+                            cell.Value = "양품-" + drCounter["cntOk"].ToString();
                             dr[0] = cell.Value;
                             dgvr.Cells.Add(cell);
                             cell = new DataGridViewTextBoxCell();
@@ -789,11 +805,11 @@ namespace IptVisionLucam
                         }
                         else
                         {
-                            cntNg++;
+                            drCounter["cntNg"] = (int)drCounter["cntNg"] + 1;
                             DISPLAY_FLAG DisplayFlag = DISPLAY_FLAG.INIT;
                             DataRow dr = dataSetOkNg.Tables["ng"].NewRow();
                             cell = new DataGridViewTextBoxCell();
-                            cell.Value = "불량-" + cntNg.ToString();
+                            cell.Value = "불량-" + drCounter["cntNg"].ToString();
                             dr[0] = cell.Value;
                             dgvr.Cells.Add(cell);
                             cell = new DataGridViewTextBoxCell();
@@ -931,20 +947,24 @@ namespace IptVisionLucam
                             switch (DisplayFlag)
                             {
                                 case DISPLAY_FLAG.NONE:
-                                    cntDisplayNG_None++;
+                                    drCounter["DisplayNG_None"] = (int)drCounter["DisplayNG_None"] + 1;
                                     break;
                                 case DISPLAY_FLAG.DEFEACT:
-                                    cntDisplayNG_Defeat++;
+                                    drCounter["DisplayNG_Defeat"] = (int)drCounter["DisplayNG_Defeat"] + 1;
                                     break;
                                 case DISPLAY_FLAG.BUBBLE:
-                                    cntDisplayNG_Bubble++;
+                                    drCounter["DisplayNG_Bubble"] = (int)drCounter["DisplayNG_Bubble"] + 1;
                                     break;
                                 case DISPLAY_FLAG.DK:
-                                    cntDisplayNG_DK++;
+                                    drCounter["DisplayNG_DK"] = (int)drCounter["DisplayNG_DK"] + 1;
                                     break;
                                 case DISPLAY_FLAG.SIL:
-                                    cntDisplayNG_Sil++;
+                                    drCounter["DisplayNG_Sil"] = (int)drCounter["DisplayNG_Sil"] + 1;
                                     break;
+                                    //case DISPLAY_FLAG.CT:
+                                    //    cntDisplayNG_CT++;
+                                    //    ngCode = "CT";
+                                    //break;
                             }
                         }
                     }
@@ -976,35 +996,37 @@ namespace IptVisionLucam
         }
         private string MakeResultText()
         {
-            int divide = (cntAll == cntNoLenz1) ? 1 : cntAll - cntNoLenz1;
+            int divide = ((int)drCounter["count"] == (int)drCounter["NoLenz1"]) ? 1 : (int)drCounter["count"] - (int)drCounter["NoLenz1"];
 
-            string resultText = "[Total:" + (cntAll - 2).ToString()
-                       + ", OK:" + cntOk.ToString()
-                        + ", NG:" + cntNg.ToString()
+            string resultText = "[Total:" + ((int)drCounter["count"] - 2).ToString()
+                       + ", OK:" + drCounter["cntOk"]
+                        + ", NG:" + drCounter["cntNg"]
                         + " // "
-                    + "미분리:" + cntDisplayNG_None.ToString()
-                    + ", 기포:" + cntDisplayNG_Bubble.ToString()
-                    + ", 파손:" + cntDisplayNG_Defeat.ToString()
-                    + ", 뜯김:" + cntDisplayNG_DK.ToString()
-                    + ", 실:" + cntDisplayNG_Sil.ToString()
+                    + "미분리:" + drCounter["DisplayNG_None"]
+                    + ", 기포:" + drCounter["DisplayNG_Bubble"]
+                    + ", 파손:" + drCounter["DisplayNG_Defeat"]
+                    + ", 뜯김:" + drCounter["DisplayNG_DK"]
+                    + ", 실:" + drCounter["DisplayNG_Sil"]
+                    + ", CT:" + drCounter["DisplayNG_Ct"]
                     + "]\n"
-                        + "[A:" + (cntAll - cntNoLenz1).ToString()
-                        + ", OK:" + cntOK1.ToString() + "(" + (cntOK1 * 100 / (divide)).ToString() + "%)"
-                        + ", 파손:" + cntDefeat1.ToString()
-                        + ", 기포:" + cntBubble.ToString()
-                        + ", 인쇄:" + cntPaint.ToString()
-                        + ", 에지:" + cntEdge.ToString()
+                        + "[A:" + ((int)drCounter["count"] - (int)drCounter["NoLenz1"]).ToString()
+                        + ", OK:" + drCounter["OK1"] + "(" + ((int)drCounter["OK1"] * 100 / divide).ToString() + "%)"
+                         + ", 파손:" + drCounter["Defeat1"]
+                    + ", 기포:" + drCounter["Bubble"]
+                    + ", 인쇄:" + drCounter["Paint"]
+                    + ", 에지:" + drCounter["Edge"]
+                     + ", CT:" + drCounter["Ct"]
                         + "]";
-            if (cntAll > 2)
+            if ((int)drCounter["count"] > 2)
             {
-                int sub2 = ((cntAll - 2) == cntNoLenz2) ? 1 : (cntAll - 2) - cntNoLenz2;
-                resultText += "  [B:" + ((cntAll - 2) - cntNoLenz2).ToString()
-                    + ", OK:" + cntOK2.ToString() + "(" + (cntOK2 * 100 / (sub2)).ToString() + "%)"
-                    + ", 파손:" + cntDefeat2.ToString()
-                    + ", 실:" + cntSil.ToString()
-                    + ", 뜯김:" + cntDK.ToString()
-                    + ", 탑:" + cntTop.ToString()
-                    + "]";
+                int sub2 = (((int)drCounter["count"] - 2) == (int)drCounter["NoLenz2"]) ? 1 : ((int)drCounter["count"] - 2) - (int)drCounter["NoLenz2"];
+                resultText += "  [B:" + (((int)drCounter["count"] - 2) - (int)drCounter["NoLenz2"]).ToString()
+                    + ", OK:" + drCounter["OK2"].ToString() + "(" + ((int)drCounter["OK2"] * 100 / (sub2)).ToString() + "%)"
+                    + ", 파손:" + drCounter["Defeat2"]
+                    + ", 실:" + drCounter["Sil"]
+                + ", 뜯김:" + drCounter["DK"]
+                    + ", 탑:" + drCounter["TOP"]
+                + "]";
             }
 
             return resultText;
@@ -1070,7 +1092,7 @@ namespace IptVisionLucam
                             }
                             break;
                         }
-                        cntTotalUpload++;
+                        drCounter["totalUpCount"] = (int)drCounter["totalUpCount"] + 1;
                         printRemainedUpload();
                     }
                     Thread.Sleep(10);
@@ -1088,6 +1110,10 @@ namespace IptVisionLucam
         #endregion "ThreadCode"
 
         #region "functions"
+        private void logPrint(object sender, LogArgs e)
+        {
+            logPrint(e.Where, ((e.Ex != null) ? e.Ex.ToString() : e.Message));
+        }
         private void logPrint(string where, string msg)
         {
             lock (lockObject)
@@ -1223,6 +1249,7 @@ namespace IptVisionLucam
                         upLoadQueue.Enqueue(dicParam);
                         printRemainedUpload();
                     }
+
                 }
                 else
                 {
@@ -1234,11 +1261,131 @@ namespace IptVisionLucam
                 logPrint(MethodBase.GetCurrentMethod().Name, ex.ToString());
             }
         }
+        void wLotFinish()
+        {
+            try
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "wLotFinish (시작)"));
+                Thread.Sleep(3000);
+                string srcTxtName = m_tempDir + @"\" + drSystem["lotNumber"].ToString() + ".txt";
+                string netCompleteName = m_uploadDir + @"\completed\" + drSystem["lotNumber"].ToString() + @".txt";
+                string netListName = m_uploadDir + @"\resultList\" + drSystem["lotNumber"].ToString() + @".txt";
+                if ((bool)drCounter["bUpload"])
+                {
+                    if (File.Exists(srcTxtName))
+                    {
+                        try
+                        {
+                            File.Copy(srcTxtName, netListName, true);
+                            File.Copy(srcTxtName, netCompleteName, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex));
+                        }
+                    }
+                    else
+                    {
+                        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, srcTxtName + "파일을 찾을 수 없습니다."));
+                    }
+                }
+                bInFinish = true;
+
+                SaveLog();
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "SaveLog()"));
+                UpdateErp();
+                SendLogToEES();
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "SendLogToEES()"));
+
+                //objectAssign(this, new ObjectAssignArgs(Color.LightBlue, ObjectAssignArgs.ObjectType.TextBox_BackColor, textBoxLotNumber));
+                //objectAssign(this, new ObjectAssignArgs(Color.LightBlue, ObjectAssignArgs.ObjectType.Panel_BackColor, panelResultBase));
+                textBoxLotNumber.InvokeIfNeeded(() => textBoxLotNumber.BackColor = Color.LightBlue);
+                panelResultBase.InvokeIfNeeded(() => panelResultBase.BackColor = Color.LightBlue);
+                tabControlView.InvokeIfNeeded(() => tabControlView.SelectedIndex = 2);
+
+                // TODO 여기다 pop에 종료 신호 보내자
+                if ((bool)drCounter["bUpload"])
+                {
+
+                    //TCPClient client = new TCPClient();
+                    //client.IpAddress = popIpAddress;
+                    //client.SendMessage += new TCPClient.SendMessageNotify(OnRecieveMessage4);
+                    //client.Send("?get_data_ngcode||");
+                    //client.Send("?set_end||mc_cd=" + mccd);
+                }
+                Thread.Sleep(5000);
+                //buttonEnterNext.InvokeIfNeeded(() => buttonEnterNext.Enabled = true);
+                //added by dkpark 2021-09-13
+                //buttonLotChange.InvokeIfNeeded(() => buttonLotChange.Enabled = true);
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "wLotFinish (끝)"));
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex));
+            }
+        }
+        private void CopyTable(string lottStartTime, string lotFinishTime)
+        {
+            //Bitmap b = new Bitmap(dataGridViewFinish.Width, dataGridViewFinish.Height);
+            //dataGridViewFinish.DrawToBitmap(b, new Rectangle(0, 0, b.Width, b.Height));
+            //pictureBoxPrevLog.InvokeIfNeeded(() => pictureBoxPrevLog.Image = b);
+            try
+            {
+                dataSetFinish.Tables[0].Rows[0]["etc"] = "작업시간 : " + lottStartTime + " ~ " + lotFinishTime;
+            }
+            catch { }
+            dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\copyFinishLog.xml", XmlWriteMode.WriteSchema);
+            LoadBackFinish();
+        }
+        private void SaveLog()
+        {
+            DateTime now = DateTime.Now;
+            string lotStartTime = dataSetBackup.Tables["fixedBackup"].Rows[0]["lotStartTime"].ToString();
+            string lotFinishTime = now.ToString("yyyy-MM-dd HH:mm");
+            CopyTable(lotStartTime, lotFinishTime);
+            string path = m_settingDir + @"\logFinish\log-" + now.ToString("yyyy-MM");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string filename = path + @"\finish-" + now.ToString("yyyy-MM-dd") + ".csv";
+            bool bExistFile = File.Exists(filename);
+            using (FileStream fs = File.Open(filename, FileMode.Append))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    DataColumnCollection dcc = dataSetFinish.Tables[0].Columns;
+                    if (bExistFile == false)
+                    {
+                        string header = "시작,마감";
+                        foreach (DataColumn v in dcc)
+                        {
+                            header += ("," + v.Caption);
+                        }
+                        w.WriteLine(header);
+                    }
+                    {
+                        string data = lotStartTime + "," + lotFinishTime;
+                        DataRow dr = dataSetFinish.Tables[0].Rows[0];
+                        for (int i = 0; i < dcc.Count; i++)
+                        {
+                            string value = dr[i].ToString();
+                            if (value.Contains(","))
+                            {
+                                value = "\"" + value + "\"";
+                            }
+                            data += ("," + value);
+                        }
+                        w.WriteLine(data);
+                    }
+                }
+            }
+        }
         private void printRemainedUpload()
         {
             try
             {
-                labelNet.InvokeIfNeeded(() => labelNet.Text = "남은 업로드 : (" + upLoadQueue.Count.ToString() + "/" + cntTotalUpload.ToString() + ")");
+                labelNet.InvokeIfNeeded(() => labelNet.Text = "남은 업로드 : (" + upLoadQueue.Count.ToString() + "/" + ((int)drCounter["totalUpCount"]).ToString() + ")");
             }
             catch (Exception ex)
             {
@@ -1631,7 +1778,7 @@ namespace IptVisionLucam
                 curNG[1] = Constants.NG_NO_LENZ;
                 m_startTick = DateTime.Now.Ticks;
                 statusStrip1.InvokeIfNeeded(() => labelMessage.Text += "[측정 시작]");
-                cntAll++;
+                drCounter["count"] = ((int)drCounter["count"]) + 1;
                 buttonCapture.Enabled = false;
                 //if (serialPortIptPLC1.IsOpen)
                 //    serialPortIptPLC1.Write("@T71\r");
@@ -1639,7 +1786,7 @@ namespace IptVisionLucam
                 labelResult1.Text = "";
                 labelResult2.Text = "";
 
-                buttonCapture.Text = "[측정 시작[" + StageIndex + "] (" + cntAll.ToString() + ")]";
+                buttonCapture.Text = "[측정 시작[" + StageIndex + "] (" + drCounter["count"].ToString() + ")]";
                 wCheckResult = new Thread(new ThreadStart(wtCheckResult));
                 wCheckResult.Start();
                 string filename = "";
@@ -1833,7 +1980,7 @@ namespace IptVisionLucam
                         if (name[i] == '+') return false;
                         if (i != 9 && name[i] == '-') return false;
                     }
-                    if (name[0] != 'B' && name[0] != 'b') return false;
+                    //if (name[0] != 'B' && name[0] != 'b') return false;
                     int year = int.Parse(name.Substring(1, 4));
                     if (year < 2012 || year > 2099) return false;
                     int month = int.Parse(name.Substring(5, 2));
@@ -1855,6 +2002,7 @@ namespace IptVisionLucam
                 return false;
             }
         }
+        object objectLockCounter = new object();
         private void deleteResult()
         {
             try
@@ -1862,27 +2010,35 @@ namespace IptVisionLucam
                 StageIndex = 0;
                 StageIndexState = 0;
 
-                cntAll = 0;
-                cntOk = 0;
-                cntNg = 0;
-                cntTotalUpload = 0;
-                cntNoLenz1 = 0;
-                cntNoLenz2 = 0;
-                cntOK1 = 0;
-                cntOK2 = 0;
-                cntBubble = 0;
-                cntDefeat1 = 0;
-                cntDefeat2 = 0;
-                cntPaint = 0;
-                cntEdge = 0;
-                cntSil = 0;
-                cntDK = 0;
-                cntTop = 0;
-                cntDisplayNG_Bubble = 0;
-                cntDisplayNG_Defeat = 0;
-                cntDisplayNG_DK = 0;
-                cntDisplayNG_Sil = 0;
-                cntDisplayNG_None = 0;
+                lock (objectLockCounter)
+                {
+                    drCounter["count"] = 0;
+                }
+                drCounter["cntOk"] = 0;
+                drCounter["cntNg"] = 0;
+                drCounter["totalUpCount"] = 0;
+                drCounter["NoLenz1"] = 0;
+                drCounter["NoLenz2"] = 0;
+                drCounter["OK1"] = 0;
+                drCounter["OK2"] = 0;
+                drCounter["Bubble"] = 0;
+                drCounter["Defeat1"] = 0;
+                drCounter["Defeat2"] = 0;
+                drCounter["Paint"] = 0;
+                drCounter["Edge"] = 0;
+                drCounter["Ct"] = 0;
+                drCounter["Sil"] = 0;
+                drCounter["DK"] = 0;
+                drCounter["TOP"] = 0;
+
+                drCounter["DisplayNG_Bubble"] = 0;
+                drCounter["DisplayNG_Defeat"] = 0;
+                drCounter["DisplayNG_CT"] = 0;
+                drCounter["DisplayNG_DK"] = 0;
+                drCounter["DisplayNG_Sil"] = 0;
+                drCounter["DisplayNG_None"] = 0;
+                drCounter["DisplayNG_Empty1"] = 0;
+                drCounter["DisplayNG_Empty2"] = 0;
 
                 upLoadQueue.Clear();
                 groupBoxResultList.Text = "결과 리스트";
@@ -2134,6 +2290,7 @@ namespace IptVisionLucam
                                     return;
                                 }
                                 okProcess(-1, -1, -1, -1);
+                                wLotFinish();
                                 break;
                         }
                     }
@@ -2250,6 +2407,7 @@ namespace IptVisionLucam
                 {
                     dr = dataSetBackup.Tables["fixedBackup"].Rows[0];
                     drcRoi = dataSetBackup.Tables["roiCam"].Rows;
+                    drSystem = dataSetBackup.Tables["fixedBackup"].Rows[0];
                     bDebug = (bool)dr["debug"];
                     bNoCamera = (100 == (int)dr["machineCode"]) ? true : false;
                     if (!dr["resultDrive"].ToString().Equals("c"))
@@ -2259,6 +2417,10 @@ namespace IptVisionLucam
                     System.IO.Directory.CreateDirectory(m_resultDir);
                     bAdvIO = (bool)dr["bAdvIO"];
                     bResizing = (bool)dr["bResizing"];
+                    checkBoxErpOff.Checked = (bool)drSystem["bErpOff"];
+                    checkBoxEesOff.Checked = (bool)drSystem["bEesOff"];
+                    checkBoxErp1110_Off.Checked = (bool)drSystem["bErp1110_Off"];
+                    bUseNetwork = (bool)drSystem["bUseNetwork"];
                 }
                 catch (Exception ex)
                 {
@@ -2300,29 +2462,29 @@ namespace IptVisionLucam
 
                             eStatusPrevMaster[0] = (eResultStatus)drTemp["eStatusPrevMaster0"];
                             eStatusPrevMaster[1] = (eResultStatus)drTemp["eStatusPrevMaster1"];
-                            cntAll = (int)drTemp["count"];
-                            cntOk = (int)drTemp["cntOk"];
-                            cntNg = (int)drTemp["cntNg"];
-                            bUpload = (bool)drTemp["bUpload"];
-                            cntTotalUpload = (int)drTemp["totalUpCount"];
-                            cntNoLenz1 = (int)drTemp["NoLenz1"];
-                            cntOK1 = (int)drTemp["OK1"];
-                            cntBubble = (int)drTemp["Bubble"];
-                            cntDefeat1 = (int)drTemp["Defeat1"];
-                            cntPaint = (int)drTemp["Paint"];
-                            cntNoLenz2 = (int)drTemp["NoLenz2"];
-                            cntOK2 = (int)drTemp["OK2"];
-                            cntSil = (int)drTemp["Sil"];
-                            cntDefeat2 = (int)drTemp["Defeat2"];
-                            cntDK = (int)drTemp["DK"];
-                            cntTop = (int)drTemp["TOP"];
-                            cntEdge = (int)drTemp["Edge"];
+                            //cntAll = (int)drTemp["count"];
+                            //cntOk = (int)drTemp["cntOk"];
+                            //cntNg = (int)drTemp["cntNg"];
+                            //bUpload = (bool)drTemp["bUpload"];
+                            //drCounter["totalUpCount"] = (int)drTemp["totalUpCount"];
+                            //cntNoLenz1 = (int)drTemp["NoLenz1"];
+                            //cntOK1 = (int)drTemp["OK1"];
+                            //cntBubble = (int)drTemp["Bubble"];
+                            //cntDefeat1 = (int)drTemp["Defeat1"];
+                            //cntPaint = (int)drTemp["Paint"];
+                            //cntNoLenz2 = (int)drTemp["NoLenz2"];
+                            //cntOK2 = (int)drTemp["OK2"];
+                            //drCounter["Sil"] = (int)drTemp["Sil"];
+                            //cntDefeat2 = (int)drTemp["Defeat2"];
+                            //cntDK = (int)drTemp["DK"];
+                            //drCounter["TOP"] = (int)drTemp["TOP"];
+                            //cntEdge = (int)drTemp["Edge"];
 
-                            cntDisplayNG_Bubble = (int)drTemp["DisplayNG_Bubble"];
-                            cntDisplayNG_Defeat = (int)drTemp["DisplayNG_Defeat"];
-                            cntDisplayNG_DK = (int)drTemp["DisplayNG_DK"];
-                            cntDisplayNG_Sil = (int)drTemp["DisplayNG_Sil"];
-                            cntDisplayNG_None = (int)drTemp["DisplayNG_None"];
+                            //cntDisplayNG_Bubble = (int)drTemp["DisplayNG_Bubble"];
+                            //cntDisplayNG_Defeat = (int)drTemp["DisplayNG_Defeat"];
+                            //cntDisplayNG_DK = (int)drTemp["DisplayNG_DK"];
+                            //cntDisplayNG_Sil = (int)drTemp["DisplayNG_Sil"];
+                            //cntDisplayNG_None = (int)drTemp["DisplayNG_None"];
 
                             //pictureBoxPalette.LoadBackup(m_tempDir + @"\paletteBackup.xml");
                             dataSetOkNg.Clear();
@@ -2366,6 +2528,14 @@ namespace IptVisionLucam
                         dt.Rows.Add(dt.NewRow());
                     }
                 }
+
+                DataTable dtBackup = dataSetTempData.Tables["tempBackup"];
+                for (int i = dtBackup.Rows.Count; i < 1; i++)
+                {
+                    dtBackup.Rows.Add(dtBackup.NewRow());
+                }
+                IptUtilDataSet.CheckNullItem(dataSetTempData);
+                drCounter = dataSetTempData.Tables["tempBackup"].Rows[0];
             }
             catch
             {
@@ -2434,7 +2604,7 @@ namespace IptVisionLucam
                 dr = dataSetBackup.Tables["boundaryParameter"].Rows[0];
                 loadBaundaryParameter(ref dr);
 
-                buttonCapture.Text = "[측정 시작(" + cntAll.ToString() + ")]";
+                buttonCapture.Text = "[측정 시작(" + drCounter["cntOk"].ToString() + ")]";
 
                 //textBoxOkIndex.Text = pictureBoxPalette.GetOkIndex().ToString();
                 //textBoxPaletteIndex.Text = pictureBoxPalette.GetPaletteIndex().ToString();
@@ -2475,11 +2645,34 @@ namespace IptVisionLucam
                 labelMessage.Text += "[변수 설정 적용부3 실패]";
                 labelMessage.BackColor = Color.Red;
             }
+            try
+            {
+                dataSetFinish.ReadXml(m_tempDir + @"\finish.xml", XmlReadMode.ReadSchema);
+            }
+            catch
+            {
+                dataSetFinish.Clear();
+                dataSetFinish.Tables[0].Rows.Add();
+            }
+            dataGridViewFinish.DataSource = dataSetFinish.Tables[0];
+            foreach (DataGridViewColumn v in dataGridViewFinish.Columns)
+            {
+                v.HeaderText = dataSetFinish.Tables[0].Columns[v.Name].Caption;
+                switch (v.Name)
+                {
+                    case "COUNT_ERROR":
+                        v.ReadOnly = false;
+                        break;
+                    default:
+                        v.ReadOnly = true;
+                        break;
+                }
+            }
             //if (serialPortIptPLC.IsOpen)
             //{
             //    serialPortIptPLC.Write("@D40\r");
             //}
-            this.SetBounds(0, 0, 1280, 1000);
+            //this.SetBounds(0, 0, 1280, 980);
             tabControlView.Dock = DockStyle.Bottom;
             if (labelMessage.BackColor.Equals(Color.Red))
             {
@@ -2499,6 +2692,173 @@ namespace IptVisionLucam
             pictureBoxCam2.AllowDrop = true;
             pictureBoxResult1.AllowDrop = true;
             pictureBoxResult2.AllowDrop = true;
+            #region MES
+            if (bUseNetwork)
+            {
+                connections();
+            }
+            //added by dkpark 2021-09-13
+            tCheckFinish = new Thread(new ThreadStart(wCheckFinish));
+            tCheckFinish.Start();
+            LoadBackFinish();
+            #endregion
+        }
+        Thread tCheckFinish = null;
+        private void wCheckFinish()
+        {
+            try
+            {
+                try
+                {
+#if !DEBUG
+                    while (!bClosing)
+                    {
+                        Thread.Sleep(100);
+                        //if (bInFinish == false && clientUDP[1] != null)
+                        if (bInFinish == false)
+                        {
+                            //string[] address = new string[3] { drSystem["addrPlcQty"].ToString(), drSystem["addrPlcOk"].ToString(), drSystem["addrPlcNg"].ToString() };
+                            //int[] D = new int[address.Length];
+                            //byte[] sendData = MitubishPLC.RandomReadWordTypeQnA3E(address);
+                            try
+                            {
+                                //clientUDP[1].Send(sendData, sendData.Length, plcEndPoint[1]);
+                                //byte[] buffer = clientUDP[1].Receive(ref plcEndPoint[1]);
+                                //if (buffer[0] == 0xd0)
+                                {
+                                    //int headPos = 11;
+                                    //for (int i = 0; i < address.Length; i++)
+                                    //{
+                                    //    int value1 = buffer[headPos];
+                                    //    headPos++;
+                                    //    int value2 = buffer[headPos];
+                                    //    headPos++;
+                                    //    D[i] = (Int16)(value1 + (value2 << 8));
+                                    //}
+                                    //countPlcQty = D[0];
+                                    //countPlcOk = D[1];
+                                    //countplcNg = D[2];
+                                    SafeNativeMethods.PostMessage(mainHandle, (uint)UWM.UPDATE_DATASET_FINISH, IntPtr.Zero, IntPtr.Zero);
+                                    //DataRow dr = dataSetFinish.Tables[0].Rows[0];
+                                    //int countError = (int)dr["PR_QTY"] - countPlcQty;
+                                    //int countNg = countPlcQty - countPlcOk + countError;
+                                    ////dr["COUNT_OK"] = countPlcOk;
+                                    //dr["COUNT_OK"] = (int)drCounter["cntOk"];
+                                    //dr["COUNT_NONE"] = (int)drCounter["DisplayNG_None"];
+                                    //dr["COUNT_EDGE_BUBBLE"] = (int)drCounter["DisplayNG_Bubble"];
+                                    //dr["COUNT_DEFECT"] = (int)drCounter["DisplayNG_Defeat"];
+                                    //dr["COUNT_DK"] = (int)drCounter["DisplayNG_DK"];
+                                    //dr["COUNT_SIL"] = (int)drCounter["DisplayNG_Sil"];
+                                    //dr["COUNT_CT"] = (int)drCounter["DisplayNG_CT"];
+                                    //dr["COUNT_EMPTY1"] = (int)drCounter["DisplayNG_Empty1"];
+                                    //dr["COUNT_EMPTY2"] = (int)drCounter["DisplayNG_Empty2"];
+                                    //dr["COUNT_ERROR"] = countError;
+                                    //dr["COUNT_NG"] = countNg;
+                                    //dr["plcQty"] = countPlcQty;
+                                    //dr["plcOk"] = countPlcOk;
+                                    //dr["plcNg"] = countplcNg;
+                                }
+                                //if (toolStripStatusLabelPlc2.BackColor != Color.Green)
+                                //{
+                                //    statusStrip1.InvokeIfNeeded(() => toolStripStatusLabelPlc2.BackColor = Color.Green);
+                                //}
+                                //if (bFinishSignal)
+                                //{
+                                //    if (upLoadQueue.Count > 0)
+                                //    {
+                                //        continue;
+                                //    }
+                                //    bFinishSignal = false;
+                                //    Thread t = new Thread(new ThreadStart(wLotFinish));
+                                //    t.Start();
+                                //}
+                            }
+                            catch// (Exception ex)
+                            {
+                                //if (toolStripStatusLabelPlc2.BackColor != Color.Red)
+                                //{
+                                //    statusStrip1.InvokeIfNeeded(() => toolStripStatusLabelPlc2.BackColor = Color.Red);
+                                //}
+                            }
+                        }
+                    }
+#endif
+                }
+                catch (Exception ex)
+                {
+                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", ex));
+                }
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(1)", ex));
+            }
+        }
+        private void LoadBackFinish()
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                dt.ReadXml(m_settingDir + @"\copyFinishLog.xml");
+                dataGridViewFinishCopy.DataSource = dt;
+                foreach (DataGridViewColumn v in dataGridViewFinishCopy.Columns)
+                {
+                    v.HeaderText = dt.Columns[v.Name].Caption;
+                    switch (v.Name)
+                    {
+                        case "COUNT_ERROR":
+                            v.ReadOnly = false;
+                            break;
+                        default:
+                            v.ReadOnly = true;
+                            break;
+                    }
+                }
+                labelWorkingTime.InvokeIfNeeded(() => labelWorkingTime.Text = dt.Rows[0]["etc"].ToString());
+            }
+            catch { }
+        }
+        private void connections()
+        {
+            //int plcPortnumber = (int)drSystem["plcPortnumber"];
+            //labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Red);
+            //for (int ch = 0; ch < clientUDP.Length; ch++)
+            //{
+            //    try
+            //    {
+            //        plcEndPoint[ch] = new IPEndPoint(IPAddress.Parse(drSystem["plcAddress1"].ToString()), plcPortnumber + ch);
+            //        clientUDP[ch] = new UdpClient(plcPortnumber + ch);
+            //        clientUDP[ch].Client.SendTimeout = 1000;
+            //        clientUDP[ch].Client.ReceiveTimeout = 1000;
+            //        threadQuery[ch] = new Thread(new ParameterizedThreadStart(ThreadPlcReadQuery));
+            //        threadQuery[ch].Start(ch);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show(ex.ToString());
+            //    }
+            //}
+            //labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Green);
+        }
+        private void closeConnection()
+        {
+            //for (int ch = 0; ch < clientUDP.Length; ch++)
+            //{
+            //    try
+            //    {
+            //        if (threadQuery[ch] != null) threadQuery[ch].Abort();
+            //    }
+            //    catch { }
+            //}
+            //Thread.Sleep(300);
+            //for (int ch = 0; ch < clientUDP.Length; ch++)
+            //{
+            //    try
+            //    {
+            //        if (clientUDP[ch] != null) clientUDP[ch].Close();
+            //    }
+            //    catch { }
+            //}
         }
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -2526,7 +2886,7 @@ namespace IptVisionLucam
                 logPrint("", "");
                 //dataSetBackup.Tables["fixedBackup"].Rows[0]["debug"] = bDebug;
                 //dataSetBackup.Tables["fixedBackup"].Rows[0]["mode"] = "Master";
-                if (cntAll == 0)
+                if ((int)drCounter["cntOk"] == 0)
                 {
                     File.Delete(m_tempDir + @"\tempData.xml");
                 }
@@ -2539,38 +2899,36 @@ namespace IptVisionLucam
                 {
                     //pictureBoxPalette.SaveBackup(m_tempDir + @"\paletteBackup.xml");
                     dataSetOkNg.WriteXml(m_tempDir + @"\OkNgList.xml", XmlWriteMode.WriteSchema);
-                    dataSetTempData.Tables["tempBackup"].Rows.Clear();
-                    DataRow drTemp = dataSetTempData.Tables["tempBackup"].NewRow();
-                    drTemp["eStatusPrevMaster0"] = eStatusPrevMaster[0];
-                    drTemp["eStatusPrevMaster1"] = eStatusPrevMaster[1];
-                    drTemp["eStatusPrevMaster2"] = 0;
-                    drTemp["eStatusPrevMaster3"] = 0;
-                    drTemp["eStatusPrevMaster4"] = 0;
-                    drTemp["count"] = cntAll;
-                    drTemp["cntOk"] = cntOk;
-                    drTemp["cntNg"] = cntNg;
-                    drTemp["bUpload"] = bUpload;
-                    drTemp["totalUpCount"] = cntTotalUpload;
-                    drTemp["NoLenz1"] = cntNoLenz1;
-                    drTemp["OK1"] = cntOK1;
-                    drTemp["Bubble"] = cntBubble;
-                    drTemp["Defeat1"] = cntDefeat1;
-                    drTemp["Edge"] = cntEdge;
-                    drTemp["Paint"] = cntPaint;
-                    drTemp["NoLenz2"] = cntNoLenz2;
-                    drTemp["OK2"] = cntOK2;
-                    drTemp["Sil"] = cntSil;
-                    drTemp["Defeat2"] = cntDefeat2;
-                    drTemp["DK"] = cntDK;
-                    drTemp["TOP"] = cntTop;
-                    drTemp["DisplayNG_Bubble"] = cntDisplayNG_Bubble;
-                    drTemp["DisplayNG_Defeat"] = cntDisplayNG_Defeat;
-                    drTemp["DisplayNG_DK"] = cntDisplayNG_DK;
-                    drTemp["DisplayNG_Sil"] = cntDisplayNG_Sil;
-                    drTemp["DisplayNG_None"] = cntDisplayNG_None;
-
-                    dataSetTempData.Tables["tempBackup"].Rows.Add(drTemp);
-                    dataSetTempData.WriteXml(m_tempDir + @"\tempData.xml", XmlWriteMode.WriteSchema);
+                    //dataSetTempData.Tables["tempBackup"].Rows.Clear();
+                    //DataRow drTemp = dataSetTempData.Tables["tempBackup"].NewRow();
+                    //drTemp["eStatusPrevMaster0"] = eStatusPrevMaster[0];
+                    //drTemp["eStatusPrevMaster1"] = eStatusPrevMaster[1];
+                    //drTemp["eStatusPrevMaster2"] = 0;
+                    //drTemp["eStatusPrevMaster3"] = 0;
+                    //drTemp["eStatusPrevMaster4"] = 0;
+                    //drTemp["count"] = cntAll;
+                    //drTemp["cntOk"] = cntOk;
+                    //drTemp["cntNg"] = cntNg;
+                    //drTemp["bUpload"] = bUpload;
+                    //drTemp["totalUpCount"] = (int)drCounter["totalUpCount"];
+                    //drTemp["NoLenz1"] = cntNoLenz1;
+                    //drTemp["OK1"] = cntOK1;
+                    //drTemp["Bubble"] = cntBubble;
+                    //drTemp["Defeat1"] = cntDefeat1;
+                    //drTemp["Edge"] = cntEdge;
+                    //drTemp["Paint"] = cntPaint;
+                    //drTemp["NoLenz2"] = cntNoLenz2;
+                    //drTemp["OK2"] = cntOK2;
+                    //drTemp["Sil"] = drCounter["Sil"];
+                    //drTemp["Defeat2"] = cntDefeat2;
+                    //drTemp["DK"] = cntDK;
+                    //drTemp["TOP"] = drCounter["TOP"];
+                    //drTemp["DisplayNG_Bubble"] = cntDisplayNG_Bubble;
+                    //drTemp["DisplayNG_Defeat"] = cntDisplayNG_Defeat;
+                    //drTemp["DisplayNG_DK"] = cntDisplayNG_DK;
+                    //drTemp["DisplayNG_Sil"] = cntDisplayNG_Sil;
+                    //drTemp["DisplayNG_None"] = cntDisplayNG_None;
+                    SaveTempData();
                 }
                 dataSetBackup.WriteXml(m_settingDir + @"\backup.xml", XmlWriteMode.WriteSchema);
             }
@@ -2620,7 +2978,12 @@ namespace IptVisionLucam
                     wUploader.Join();
                 }
             }
-
+            #region MES
+            if (bUseNetwork)
+            {
+                closeConnection();
+            }
+            #endregion
             for (int i = 0; i < 2; i++)
             {
                 if (iSnapshotCallbackId[i] >= 0)
@@ -2632,6 +2995,11 @@ namespace IptVisionLucam
                 }
             }
             CameraDisconnect();
+
+        }
+        void SaveTempData()
+        {
+            dataSetTempData.WriteXml(m_tempDir + @"\tempData.xml", XmlWriteMode.WriteSchema);
         }
         private void buttonTestCapture_Click(object sender, EventArgs e)
         {
@@ -3101,7 +3469,7 @@ namespace IptVisionLucam
         private string psCd = "";
         private void buttonLotChange_Click(object sender, EventArgs e)
         {
-            if (previousLotNumber.Equals(textBoxLotNumber.Text) == false && cntAll != 0)
+            if (previousLotNumber.Equals(textBoxLotNumber.Text) == false && (int)drCounter["cntOk"] != 0)
             {
                 if (MessageBox.Show("결과 삭제가 되지않은 상태로 로트번호 입력이 되었습니다.\n 계속 진행 합니까?", "경고", MessageBoxButtons.YesNo) == DialogResult.No)
                 {
@@ -3124,24 +3492,176 @@ namespace IptVisionLucam
                     }
                 }
             }
-            if (bCheckOkLotnumber && cntAll == 0)
+            if (bCheckOkLotnumber)
             {
-                FormCheckLotNo dlg = new FormCheckLotNo();
-                DataRow dr = dataSetBackup.Tables["fixedBackup"].Rows[0];
-                dlg.LotNumber = textBoxLotNumber.Text;
-                dlg.McCd = "B" + ((int)dr["machineCode"]).ToString("000");
-                dlg.PsCd = psCd;
-                dlg.Group = group;
-                dlg.ShowDialog();
-                bCheckOkLotnumber = dlg.OK;
-                psCd = dlg.PsCd;
-                group = dlg.Group;
+                {
+                    DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+                    FormCheckLotNo dlg = new FormCheckLotNo();
+                    dlg.StringConnectERP = strConnectionERP;
+                    dlg.StringConnectEES = strConnectionEES;
+                    dlg.LotNumber = textBoxLotNumber.Text;
+                    dlg.PsCd = drFinish["PS_CD"].ToString();
+                    dlg.ShowDialog();
+                    if (dlg.OK == false)
+                    {
+                        drCounter["bUpload"] = false;
+                        labelNet.Text = "작업자 확인 실패";
+                        logPrint(MethodBase.GetCurrentMethod().Name + "(2)", labelNet.Text);
+                        labelNet.BackColor = Color.Red;
+                        panelResultBase.BackColor = Color.Red;
+                        SetReady(false);
+                        MessageBox.Show(labelNet.Text);
+                        return;
+                    }
+                    drFinish["PS_CD"] = dlg.PsCd;
+                }
+                if (GetSachulSaengSanSilJuk(textBoxLotNumber.Text) == false)
+                {
+                    SetReady(false);
+                    //MessageBox.Show("사출생산실적 없음");
+                    return;
+                }
+                if (GetUseUV(textBoxLotNumber.Text, out bool bUV) == false)
+                {
+                    SetReady(false);
+                    MessageBox.Show("UV 정보를 읽을 수 없습니다.");
+                    return;
+                }
+                GetNM_PW(textBoxLotNumber.Text, out string NM, out string PW);
+                double pw = 0;
+                try
+                {
+                    pw = double.Parse(PW);
+                }
+                catch
+                {
+                    string[] _pw = PW.Split(',');
+                    pw = double.Parse(_pw[0]); // 다촛점 렌즈의 경우 첫번째 파워값을 획득
+                }
+                string name_power = "";
+                if (pw > -1.0)
+                {
+                    name_power = "0.00~0.75";
+                }
+                else if (pw > -2.0)
+                {
+                    name_power = "1.00~1.75";
+                }
+                else if (pw > -3.0)
+                {
+                    name_power = "2.00~2.75";
+                }
+                else if (pw > -4.0)
+                {
+                    name_power = "3.00~3.75";
+                }
+                else if (pw > -5.0)
+                {
+                    name_power = "4.00~4.75";
+                }
+                else
+                {
+                    name_power = "5.00~";
+                }
+                string[] parFiles = Directory.GetFiles(m_settingDir, "*.par");
+                string fineName = "";
+                foreach (var v in parFiles)
+                {
+                    if (v.Substring(v.Length - 2) == "_b") continue;
+                    string filename = Path.GetFileNameWithoutExtension(v);
+                    if (NM.Contains(filename))
+                    {
+                        fineName = v;
+                        break;
+                    }
+                }
+                if (fineName.Length > 0)
+                {
+                    loadParameter(fineName, "centerParameter");
+                    loadParameter(fineName + "_b", "boundaryParameter");
+                    string recipeName = Path.GetFileNameWithoutExtension(fineName);
+                    labelRecipe.Text = recipeName;
+                    CurrentFileName = fineName;
+                    //TODO PW레시피 읽어오기 코드 넣기.
+                    try
+                    {
+                        string filename = m_settingDir + @"\" + name_power + ".pow";
+                        dataSetPowerRecipe.Clear();
+                        dataSetPowerRecipe.ReadXml(filename);
+                        PowerToRecipe();
+                        labelRecipePower.Text = Path.GetFileNameWithoutExtension(filename);
+                        bJobChange = true;
+                        bWorkDone = false;
+                    }
+                    catch
+                    {
+                        labelRecipePower.Text = "Power Recipe 로드 되지 않음";
+                    }
+                    checkBoxUVLumTh.Checked = bUV;
+                }
+                else
+                {
+                    labelRecipe.Text = "Recipe 로드 되지 않음";
+                }
             }
+            if (bJobChange == false)
+            {
+                SetReady(false);
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", "레시피가 로드되지 않았습니다. 작업파일을 로드해주세요."));
+                MessageBox.Show("레시피가 로드되지 않았습니다. 작업파일을 로드해주세요.");
+                return;
+            }
+            if (bWorkDone == true)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", "이전 작업이 완료되었습니다. 레시피를 변경하시겠습니까?"));
+                if (MessageBox.Show("이전 작업이 완료되었습니다. \n 레시피를 변경하시겠습니까? ", "알림", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    SetReady(false);
+                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", "해당 제품 레시피를 불러오세요."));
+                    MessageBox.Show("해당 제품 레시피를 불러오세요.");
+                    bWorkDone = true;
+                    return;
+                }
+                else
+                {
+                    bWorkDone = false;
+                }
+
+            }
+            if (previousLotNumber.Equals(textBoxLotNumber.Text) == false && (int)drCounter["count"] != 0)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", "결과 삭제가 되지않은 상태로 로트번호 입력이 되었습니다. 계속 진행 합니까?"));
+                if (MessageBox.Show("결과 삭제가 되지않은 상태로 로트번호 입력이 되었습니다.\n 계속 진행 합니까?", "경고", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                {
+                    SetReady(false);
+                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", "아니오"));
+                    return;
+                }
+            }
+            if (bCheckOkLotnumber && (int)drCounter["count"] == 0)
+            {
+                drSystem["lotStartTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
+            }
+            //if (bCheckOkLotnumber && cntAll == 0)
+            //{
+            //    FormCheckLotNo dlg = new FormCheckLotNo();
+            //    DataRow dr = dataSetBackup.Tables["fixedBackup"].Rows[0];
+            //    dlg.LotNumber = textBoxLotNumber.Text;
+            //    dlg.McCd = "B" + ((int)dr["machineCode"]).ToString("000");
+            //    dlg.PsCd = psCd;
+            //    dlg.Group = group;
+            //    dlg.ShowDialog();
+            //    bCheckOkLotnumber = dlg.OK;
+            //    psCd = dlg.PsCd;
+            //    group = dlg.Group;
+            //}
             trackBarCenterShadowWidth.Value = 3;
             previousLotNumber = textBoxLotNumber.Text;
             logPrint(MethodBase.GetCurrentMethod().Name, "LotNumber=" + textBoxLotNumber.Text);
             dataSetBackup.Tables["fixedBackup"].Rows[0]["lotNumber"] = textBoxLotNumber.Text;
             System.IO.Directory.CreateDirectory(m_resultDir + @"\" + textBoxLotNumber.Text);
+            bInFinish = false;
             if (CheckLotFormat(textBoxLotNumber.Text))
             {
                 try
@@ -3153,17 +3673,7 @@ namespace IptVisionLucam
                         labelNet.Text = "네트웤 이상";
                         labelNet.BackColor = Color.Red;
                         panelResultBase.BackColor = Color.Red;
-                        if (bAdvIO)
-                        {
-                            if (instantDoCtrl1.Initialized) instantDoCtrl1.Write(0, 0);
-                        }
-                        else
-                        {
-                            if (serialPortIptPLC1.IsOpen)
-                            {
-                                serialPortIptPLC1.Write("@D00\r");
-                            }
-                        }
+                        SetReady(false);
                     }
                     else
                     {
@@ -3176,22 +3686,58 @@ namespace IptVisionLucam
                         SWrite.Close();
                         try
                         {
+#region MES
+                            if ((int)drCounter["count"] == 0)
+                            {
+                                string lastChecksheetNumber = drSystem["lastChecksheetNumber"].ToString();
+                                if (textBoxLotNumber.Text == lastChecksheetNumber)
+                                {
+                                    SetReady(false);
+                                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "이전에 작업한 채크시트 입니다. 작업을 진행할 수 없습니다. = " + lastChecksheetNumber));
+                                    MessageBox.Show("이전에 작업한 채크시트 입니다. 작업을 진행할 수 없습니다.", lastChecksheetNumber);
+                                    return;
+                                }
+                                else
+                                {
+                                    //if (bUseNetwork)
+                                    {
+#if !DEBUG
+                                        if(GetProjectNo(out string PR_NO))
+                                        {
+                                            dataSetFinish.Tables[0].Rows[0]["PR_NO"] = PR_NO;
+                                            if (InsertPRTR1120() == false)
+                                            {
+                                                drCounter["bUpload"] = false;
+                                                labelNet.Text = "EES 이상";
+                                                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(EES)", labelNet.Text));
+                                                labelNet.BackColor = Color.Red;
+                                                panelResultBase.BackColor = Color.Red;
+                                                return;
+                                            }
+                                            dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
+                                            //SendCheckSheetNo();
+                                            //SendLotStart();
+                                        }
+                                        else
+                                        {
+                                            drCounter["bUpload"] = false;
+                                            labelNet.Text = "PR_NO 획득 실패";
+                                            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", labelNet.Text));
+                                            labelNet.BackColor = Color.Red;
+                                            panelResultBase.BackColor = Color.Red;
+                                            SetReady(false);
+                                        }
+#endif
+                                    }
+                                }
+                            }
+#endregion
                             System.IO.File.Copy(desFilename, netFilename, true);
                             bUpload = true;
                             labelNet.Text = "네트웤 준비 완료";
                             labelNet.BackColor = Color.Transparent;
                             panelResultBase.BackColor = Color.LimeGreen;
-                            if (bAdvIO)
-                            {
-                                if (instantDoCtrl1.Initialized) instantDoCtrl1.Write(0, 0x10);
-                            }
-                            else
-                            {
-                                if (serialPortIptPLC1.IsOpen)
-                                {
-                                    serialPortIptPLC1.Write("@D40\r");
-                                }
-                            }
+                            SetReady(true);
                         }
                         catch { }
                     }
@@ -3202,17 +3748,7 @@ namespace IptVisionLucam
                     labelNet.Text = "네트웤 이상";
                     labelNet.BackColor = Color.Red;
                     panelResultBase.BackColor = Color.Red;
-                    if (bAdvIO)
-                    {
-                        if (instantDoCtrl1.Initialized) instantDoCtrl1.Write(0, 0);
-                    }
-                    else
-                    {
-                        if (serialPortIptPLC1.IsOpen)
-                        {
-                            serialPortIptPLC1.Write("@D00\r");
-                        }
-                    }
+                    SetReady(false);
                 }
             }
             else
@@ -3221,6 +3757,40 @@ namespace IptVisionLucam
                 labelNet.Text = "네트웤 저장하지 않음";
                 labelNet.BackColor = Color.Yellow;
                 panelResultBase.BackColor = Color.Yellow;
+                SetReady(true);
+            }
+            textBoxLotNumber.BackColor = Color.FromKnownColor(KnownColor.Window);
+            textBoxLotNumber.Enabled = false;
+        }
+        private void PowerToRecipe()
+        {
+            DataRow drSrc = dataSetPowerRecipe.Tables[0].Rows[0];
+            DataRow drDes = dataSetBackup.Tables["centerParameter"].Rows[0];
+            //drDes["bBubbleTest"] = drSrc["bBubbleTest"];
+            //drDes["bubbleTestValue"] = drSrc["bubbleTestValue"];
+            drDes["devTh"] = drSrc["devTh"];
+            drDes["lumDiffTh"] = drSrc["lumDiffTh"];
+            drDes["bUVLowHigh"] = drSrc["bUVLowHigh"];
+            drDes["uvLumLowTh"] = drSrc["uvLumLowTh"];
+            drDes["uvLumHighTh"] = drSrc["uvLumHighTh"];
+            loadCenterParameter(ref drDes);
+        }
+        private void RecipeToPower()
+        {
+            DataRow drSrc = dataSetBackup.Tables["centerParameter"].Rows[0];
+            DataRow drDes = dataSetPowerRecipe.Tables[0].Rows[0];
+            //drDes["bBubbleTest"] = drSrc["bBubbleTest"];
+            //drDes["bubbleTestValue"] = drSrc["bubbleTestValue"];
+            drDes["devTh"] = drSrc["devTh"];
+            drDes["lumDiffTh"] = drSrc["lumDiffTh"];
+            drDes["bUVLowHigh"] = drSrc["bUVLowHigh"];
+            drDes["uvLumLowTh"] = drSrc["uvLumLowTh"];
+            drDes["uvLumHighTh"] = drSrc["uvLumHighTh"];
+        }
+        void SetReady(bool bOn)
+        {
+            if (bOn)
+            {
                 if (bAdvIO)
                 {
                     if (instantDoCtrl1.Initialized) instantDoCtrl1.Write(0, 0x10);
@@ -3233,8 +3803,20 @@ namespace IptVisionLucam
                     }
                 }
             }
-            textBoxLotNumber.BackColor = Color.FromKnownColor(KnownColor.Window);
-            textBoxLotNumber.Enabled = false;
+            else
+            {
+                if (bAdvIO)
+                {
+                    if (instantDoCtrl1.Initialized) instantDoCtrl1.Write(0, 0);
+                }
+                else
+                {
+                    if (serialPortIptPLC1.IsOpen)
+                    {
+                        serialPortIptPLC1.Write("@D00\r");
+                    }
+                }
+            }
         }
         private void buttonForceUpload_Click(object sender, EventArgs e)
         {
@@ -3260,6 +3842,7 @@ namespace IptVisionLucam
                     logPrint(MethodBase.GetCurrentMethod().Name, "CLICK");
                     deleteResult();
                     textBoxLotNumber.Enabled = true;
+                    bWorkDone = true;
                 }
             }
             catch (Exception ex)
@@ -3594,7 +4177,7 @@ namespace IptVisionLucam
         }
         private enum UWM
         {
-            WM_USER = 0x400, PictureBoxIpl1_Image = WM_USER, PictureBoxIpl2_Image, UserControlBar_Value, CheckCamera1_finish, CheckCamera2_finish, serialPortPLC, FINISH1, FINISH2
+            WM_USER = 0x400, PictureBoxIpl1_Image = WM_USER, PictureBoxIpl2_Image, UserControlBar_Value, CheckCamera1_finish, CheckCamera2_finish, serialPortPLC, FINISH1, FINISH2, UPDATE_DATASET_FINISH
         };
         protected override void WndProc(ref Message msg)
         {
@@ -3602,6 +4185,9 @@ namespace IptVisionLucam
             int value = (int)msg.LParam;
             switch (msg.Msg)
             {
+                case (int)UWM.UPDATE_DATASET_FINISH:
+                    UdpateDataSetFinish();
+                    break;
                 case (int)UWM.serialPortPLC:
                     if (bAdvIO)
                     {
@@ -3633,6 +4219,31 @@ namespace IptVisionLucam
             // Call the base WndProc method
             // to process any messages not handled.
             base.WndProc(ref msg);
+        }
+
+        private void UdpateDataSetFinish()
+        {
+            DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+            drFinish["COUNT_OK"] = (int)drCounter["cntOk"];
+            drFinish["COUNT_NONE"] = (int)drCounter["DisplayNG_None"];//미분리
+            drFinish["COUNT_EDGE_BUBBLE"] = (int)drCounter["DisplayNG_Bubble"];//에지기포
+            drFinish["COUNT_DEFECT"] = (int)drCounter["DisplayNG_Defeat"];//파손
+            drFinish["COUNT_DK"] = (int)drCounter["DisplayNG_DK"];//뜯김
+            drFinish["COUNT_SIL"] = (int)drCounter["DisplayNG_Sil"];//실
+            drFinish["COUNT_PW"] = 0;// (int)drCounter["DisplayNG_PW"];//파워 (이 장비에는 없음)
+            drFinish["COUNT_CT"] = (int)drCounter["DisplayNG_CT"];//CT
+            drFinish["COUNT_EMPTY1"] = (int)drCounter["DisplayNG_Empty1"];//유실
+            drFinish["COUNT_EMPTY2"] = (int)drCounter["DisplayNG_Empty2"];//유실
+            int countNg = (int)drFinish["COUNT_NONE"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"]
+                + (int)drFinish["COUNT_DK"] + (int)drFinish["COUNT_SIL"] + (int)drFinish["COUNT_PW"] + (int)drFinish["COUNT_CT"]
+                + (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];
+            int countError = (int)drFinish["PR_QTY"] - (int)drFinish["COUNT_OK"] - countNg;
+            drFinish["COUNT_ERROR"] = countError; //전공정오차
+            drFinish["COUNT_NG"] = countNg + countError;
+            drFinish["plcQty"] = 0;// countPlcQty;
+            drFinish["plcOk"] = 0;// countPlcOk;
+            drFinish["plcNg"] = 0;// countplcNg;
+            dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
         }
 
         private void timer500msOneShot_Tick(object sender, EventArgs e)
@@ -3768,6 +4379,1285 @@ namespace IptVisionLucam
             else
                 e.Effect = DragDropEffects.None;
         }
+
+        private void dataGridViewFinish_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (bInFinish == true)
+            {
+                if (dataGridViewFinish.Columns[e.ColumnIndex].Name == "COUNT_ERROR")
+                {
+                    DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+                    int countNg = (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"] + (int)drFinish["COUNT_DK"] + (int)drFinish["COUNT_SIL"] + (int)drFinish["COUNT_CT"] + (int)drFinish["COUNT_PW"] + (int)drFinish["COUNT_UPDOWN"] + (int)drFinish["COUNT_ERROR"];
+                    drFinish["COUNT_NG"] = countNg;
+                }
+            }
+        }
+        #region EES_MODULE
+        private bool GetSmInspectDefect(string lotNumber, out int PR_QTY, out int NG_BUBBLE_QTY, out int NG_REACTION_QTY, out int NG_PRINT_QTY, out int NG_SEPARATION_QTY)
+        {
+            PR_QTY = 0;
+            NG_BUBBLE_QTY = 0;
+            NG_REACTION_QTY = 0;
+            NG_PRINT_QTY = 0;
+            NG_SEPARATION_QTY = 0;
+            try
+            {
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                string sql = dataSetBackup.Tables["sql"].Rows[0]["SmInspectDefect"].ToString() + " '" + lotNumber + "'";
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + sql));
+                Class_ERPDB db = new Class_ERPDB();
+                db.ConnectDB(strConnectionEES);
+                DataTable dt = db.GetDBtable(sql);
+                db.CloseDB();
+                dt.TableName = "SmInspectDefect";
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                dt.WriteXml(m_settingDir + @"\SmInspectDefect.xml", XmlWriteMode.WriteSchema);
+                DataRow drErp = dt.Rows[0];
+                PR_QTY = (int)(double.Parse(drErp["PR_QTY"].ToString()) + 0.5);
+                NG_BUBBLE_QTY = (int)(double.Parse(drErp["NG_BUBBLE_QTY"].ToString()) + 0.5);
+                NG_REACTION_QTY = (int)(double.Parse(drErp["NG_REACTION_QTY"].ToString()) + 0.5);
+                NG_PRINT_QTY = (int)(double.Parse(drErp["NG_PRINT_QTY"].ToString()) + 0.5);
+                NG_SEPARATION_QTY = (int)(double.Parse(drErp["NG_SEPARATION_QTY"].ToString()) + 0.5);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        private bool GetUseUV(string lotNumber, out bool bUV)
+        {
+            bUV = true;
+#if DEBUG
+            return true;
+#else
+            try
+            {
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                string sql = "SELECT GD_NM, POP_MATE_NO FROM PRTR1120 WHERE LOT_NO LIKE '" + lotNumber + "' AND GONG_CD ='10'";
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + sql));
+                Class_ERPDB db = new Class_ERPDB();
+                db.ConnectDB(strConnectionERP);
+                DataTable dt = db.GetDBtable(sql);
+                db.CloseDB();
+                dt.TableName = "test";
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                dt.WriteXml(m_settingDir + @"\GetUV.xml", XmlWriteMode.WriteSchema);
+                DataRow drErp = dt.Rows[0];
+                string pop_mate_no = drErp["POP_MATE_NO"].ToString();
+                if (pop_mate_no.Contains("BMF")) bUV = false;
+                if (pop_mate_no.Contains("SHD")) bUV = false;
+                if (pop_mate_no.Contains("MTCF")) bUV = false;
+                if (pop_mate_no.Contains("PTCF")) bUV = false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+#endif
+        }
+        private bool GetSachulSaengSanSilJuk(string lotNumber, bool bFirst = true)
+        {
+#if DEBUG
+            return true;
+#else
+            try
+            {
+                DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+                // 1
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                string sql = "SELECT A.JOB_NO,A.JOB_DT,A.GD_CD,B.GD_NM,B.SPEC,B.UNIT_CD,C.JOB_SEQ,C.GONG_CD,C.WA_CD,C.WA_GU,C.MC_CD,C.JOB_QTY,A.LOT_NO " +
+                    "FROM PRTR1110 A JOIN PRTR1111 C ON A.JOB_NO = C.JOB_NO LEFT JOIN COMT1200 B ON A.GD_CD = B.GD_CD " +
+                    "WHERE 1 = 1 AND ISNULL(C.CLOSE_YN,'0') <> '1' AND NOT EXISTS(SELECT 'NOT FOUND' FROM PRTR1120 WHERE STTS <> 'D' AND C.JOB_NO = JOB_NO AND C.JOB_SEQ = JOB_SEQ) AND A.JOB_GU = '03' AND A.JOB_NO LIKE '%' + '' + '%' " +
+                    "AND(A.GD_CD LIKE '%' + '' + '%' OR B.GD_NM LIKE '%' + '' + '%') AND A.STTS = 'C' AND C.MC_CD LIKE '' + '%' AND A.LOT_NO = '" + lotNumber + "' ORDER BY C.JOB_NO,C.JOB_SEQ";
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + sql));
+                Class_ERPDB db = new Class_ERPDB();
+                db.ConnectDB(strConnectionERP);
+                DataTable dt = db.GetDBtable(sql);
+                db.CloseDB();
+                dt.TableName = "test";
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                dt.WriteXml(m_settingDir + @"\GetSachulSaengSanSilJuk.xml", XmlWriteMode.WriteSchema);
+                string MC_CD = "B" + ((int)drSystem["machineCode"]).ToString("000");
+                try
+                {
+                    DataRow drErp = dt.Rows[0];
+                    drFinish["mcName"] = MC_CD;
+                    drFinish["checksheetNumber"] = lotNumber;
+                    drFinish["GDCD"] = drErp["GD_CD"].ToString();
+                    drFinish["GDNM"] = drErp["GD_NM"].ToString();
+                    drFinish["POWER"] = drErp["SPEC"].ToString();
+                    drFinish["PR_QTY"] = (int)(double.Parse(drErp["JOB_QTY"].ToString()) + 0.5);
+                    drFinish["JOB_NO"] = drErp["JOB_NO"].ToString();
+                    dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    if (bFirst == false)
+                    {
+                        string msgError = "생산지시를 만들었으나 읽어오지 못했습니다.";
+                        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, msgError));
+                        MessageBox.Show(msgError, MethodBase.GetCurrentMethod().Name);
+                        return false;
+                    }
+                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP 생산지시 읽기 실패 [첫번째 조건 (지시 정보 확인)] => " + ex.Message));
+                    if (CheckSachulSiljuk(lotNumber, out string NEW_GDCD, out string PR_QTY)) // 2
+                    {
+                        if (checkBoxErp1110_Off.Checked == false)
+                        {
+                            if (GetProjectNo(out string JOB_NO)) // 3
+                            {
+                                if (MakeQCode(NEW_GDCD, out string Q_CODE)) // 4
+                                {
+                                    if (MakeJiSiMaster(JOB_NO, drFinish["PS_CD"].ToString(), Q_CODE, PR_QTY, lotNumber)) // 5
+                                    {
+                                        if (MakeJiSiSangSe(JOB_NO, Q_CODE, PR_QTY, MC_CD, lotNumber)) // 6
+                                        {
+                                            return GetSachulSaengSanSilJuk(lotNumber, false);
+                                        }
+                                        else
+                                        {
+                                            string msgError = "지시 상세 테이블 정보 입력 실패";
+                                            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, msgError));
+                                            MessageBox.Show(msgError, MethodBase.GetCurrentMethod().Name);
+                                            return false;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        string msgError = "지시 마스터 테이블에 정보 입력 실패";
+                                        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, msgError));
+                                        MessageBox.Show(msgError, MethodBase.GetCurrentMethod().Name);
+                                        return false;
+                                    }
+                                }
+                                else
+                                {
+                                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "Q CODE 발행"));
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "지시 번호 수령 실패"));
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            string msgError = "분리 지시가 조회되지 않습니다. 분리 지시를 확인하세요.";
+                            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, msgError));
+                            MessageBox.Show(msgError, MethodBase.GetCurrentMethod().Name);
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        string msgError = "사출 실적이 조회되지 않습니다. 사출 실적을 확인하세요.";
+                        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, msgError));
+                        MessageBox.Show(msgError, MethodBase.GetCurrentMethod().Name);
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+#endif
+        }
+        bool MakeJiSiMaster(string JOB_NO, string PS_CD, string Q_CODE, string PR_QTY, string LOT_NO)
+        {
+            try
+            {
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                string DATETIME = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                string sql = "INSERT INTO PRTR1110 (JOB_NO, JOB_DT, FROM_DT, TO_DT, PS_CD, REMK,  GD_CD, JOB_QTY, IN_DT, AC_DT, CL_DT, STTS, JOB_GU, LOT_NO, SA_CD, JOB_TYPE, DAYTIME_GU) " +
+                    "VALUES('" + JOB_NO + "', '" + DATETIME + "', '" + DATETIME + "', '" + DATETIME + "', '" + PS_CD + "', '', '" + Q_CODE + "', '" + PR_QTY + "', '" + DATETIME + "',  '" + DATETIME + "',  '" + DATETIME + "', 'C', '03', '" + LOT_NO + "', '01', 'PR0011', 'PR0061')";
+                //                    +                    "FROM PRTR1120 WHERE GONG_CD = '10' AND STTS = 'C' AND LOT_NO ='"+ LOT_NO + "'";
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + sql));
+                return WriteDB(strConnectionERP, sql, true, out string msg);
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+                return false;
+            }
+        }
+        bool MakeJiSiSangSe(string JOB_NO, string Q_CODE, string PR_QTY, string MC_CD, string lotNumber)
+        {
+            try
+            {
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                string DATETIME = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                string sql = "INSERT INTO PRTR1111 (JOB_NO, JOB_SEQ, GD_CD, GONG_CD, FROM_DT, TO_DT, JOB_QTY, WA_CD, MC_CD, WA_GU) " +
+                    "VALUES('" + JOB_NO + "', 1, '" + Q_CODE + "', 20, '" + DATETIME + "', '" + DATETIME + "', '" + PR_QTY + "', '10', '" + MC_CD + "', 'I')";
+                //+ "FROM PRTR1120 WHERE GONG_CD='10' AND STTS='C' AND LOT_NO ='" + lotNumber +"'";
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + sql));
+                return WriteDB(strConnectionERP, sql, true, out string msg);
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+                return false;
+            }
+        }
+        bool MakeQCode(string NEW_GDCD, out string QCode)
+        {
+            QCode = "";
+            try
+            {
+                QCode = "Q" + NEW_GDCD.Substring(1);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+                return false;
+            }
+        }
+        bool CheckSachulSiljuk(string lotNumber, out string NEW_GDCD, out string PR_QTY)
+        {
+            NEW_GDCD = "";
+            PR_QTY = "";
+            try
+            {
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                string sql = "SELECT * FROM PRTR1120 WHERE GONG_CD = '10' AND STTS ='C' AND LOT_NO='" + lotNumber + "'";
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + sql));
+                Class_ERPDB db = new Class_ERPDB();
+                db.ConnectDB(strConnectionERP);
+                DataTable dt = db.GetDBtable(sql);
+                db.CloseDB();
+                dt.TableName = "test";
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                dt.WriteXml(m_settingDir + @"\CheckSachulSiljuk.xml", XmlWriteMode.WriteSchema);
+                if (dt.Rows.Count == 0)
+                {
+                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "사출실적 없음"));
+                    return false;
+                }
+                NEW_GDCD = dt.Rows[0]["NEW_GDCD"].ToString();
+                PR_QTY = dt.Rows[0]["PR_QTY"].ToString();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+                return false;
+            }
+        }
+        private void GetNM_PW(string lotNumber, out string NM, out string PW)
+        {
+            NM = "";
+            PW = "";
+#if DEBUG
+            NM = "PIA_MS1 Dazzle Beige_2T";
+            PW = "0.00";
+#else
+            try
+            {
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                string sql = "exec wi_pr1122_print '" + lotNumber + "' ";
+                Class_ERPDB db = new Class_ERPDB();
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + sql));
+                db.ConnectDB(strConnectionERP);
+                DataTable dt = db.GetDBtable(sql);
+                db.CloseDB();
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                try
+                {
+                    NM = dt.Rows[0]["gdnm"].ToString();
+                    PW = dt.Rows[0]["SP"].ToString();
+                }
+                catch
+                {
+                    NM = "none";
+                    PW = "none";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+            }
+#endif
+            labelNM_PW.Text = NM + " / " + PW;
+        }
+        private bool GetProjectNo(out string PR_NO)
+        {
+            PR_NO = "";
+#if DEBUG
+            PR_NO = "testPR_NO";
+            return true;
+#else
+            try
+            {
+                //string sql = "SELECT DBO.fnCodeNo('ERP_TB_PRTR1123', getdate())";
+                string sql = dataSetBackup.Tables["sql"].Rows[0]["GetProjectNo1"].ToString();
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + sql));
+                Class_ERPDB db = new Class_ERPDB();
+                //db.ConnectDB(strConnectionEES);
+                db.ConnectDB(strConnectionERP);
+                DataTable dt = db.GetDBtable(sql);
+                db.CloseDB();
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                try
+                {
+                    PR_NO = dt.Rows[0][0].ToString();
+                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "PR_NO = " + PR_NO));
+                    return true;
+                }
+                catch
+                {
+                    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ESS PR_NO 읽기 실패"));
+                    MessageBox.Show("ESS PR_NO 읽기 실패", MethodBase.GetCurrentMethod().Name);
+                    PR_NO = "none";
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ESS PR_NO 읽기 실패"));
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+#endif
+        }
+        private bool InsertPRTR1120()
+        {
+            try
+            {
+                DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+                DateTime now = DateTime.Now;
+                if (checkBoxErpOff.Checked)
+                {
+                    logPrint(MethodBase.GetCurrentMethod().Name, "checkBoxErpOff.Checked = True");
+                }
+                else
+                {  // 실적 생성하기 (PRTR1120)
+                    string query = "insert into PRTR1120 (PR_NO, LOT_NO, PR_DT, IN_DT, FROM_DT, FROM_TIME, MC_CD, GONG_CD, WA_CD, JOB_QTY, PS_CD, NEW_GDCD, PR_JOBNO, JOB_NO, JOB_SEQ, SA_CD, FWH_CD, TWH_CD) values("
+                        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                        + ",'" + drFinish["checksheetNumber"] + "'" // LOT_NO
+                        + ",'" + now.ToString("yyyy-MM-dd 00:00:00") + "'" // PR_DT
+                        + ",'" + now.ToString("yyyy-MM-dd HH:mm:ss") + "'" // IN_DT
+                        + ",'" + now.ToString("yyyy-MM-dd HH:mm:ss") + "'" // FROM_DT
+                        + ",'" + now.ToString("HH:mm") + "'" // FROM_TIME
+                        + ",'" + drFinish["mcName"] + "'" // MC_CD
+                        + ",'" + "20" + "'" // GONG_CD
+                        + ",'" + "10" + "'" // WA_CD
+                        + ",'" + drFinish["PR_QTY"] + "'" // JOB_QTY
+                        + ",'" + drFinish["PS_CD"] + "'" // PS_CD
+                        + ",'" + drFinish["GDCD"] + "'" // NEW_GDCD
+                        + ",'" + drFinish["JOB_NO"] + "'" // PR_JOBNO
+                        + ",'" + drFinish["JOB_NO"] + "'" //JOB_NO
+                        + ",'1','01','Q001','R001')"; //JOB_SEQ, SA_CD, FWH_CD, TWH_CD
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query);
+                    if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "ERP PRTR1120 업로드 실패");
+                        MessageBox.Show("ERP PRTR1120 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                        return false;
+                    }
+                    //return true; 
+                }
+                if (checkBoxEesOff.Checked)
+                {
+                    logPrint(MethodBase.GetCurrentMethod().Name, "checkBoxEesOff.Checked = True");
+                    return true;
+                }
+                else
+                {  // 실적 생성하기 (PRTR1120)
+                    string query = "insert into ERP_TB_PRTR1120 (PR_NO, LOT_NO, PR_DT, IN_DT, FROM_DT, FROM_TIME, MC_CD, GONG_CD, WA_CD, JOB_QTY, PS_CD, NEW_GDCD, PR_JOBNO, JOB_NO, GD_CD, STTS, JOB_SEQ, SA_CD, FWH_CD, TWH_CD) values("
+                        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                        + ",'" + drFinish["checksheetNumber"] + "'" // LOT_NO
+                        + ",'" + now.ToString("yyyy-MM-dd HH:mm:ss") + "'" // PR_DT
+                        + ",'" + now.ToString("yyyy-MM-dd HH:mm:ss") + "'" // IN_DT
+                        + ",'" + now.ToString("yyyy-MM-dd HH:mm:ss") + "'" // FROM_DT
+                        + ",'" + now.ToString("HH:mm") + "'" // FROM_TIME
+                        + ",'" + drFinish["mcName"] + "'" // MC_CD
+                        + ",'" + "20" + "'" // GONG_CD
+                        + ",'" + "10" + "'" // WA_CD
+                        + ",'" + drFinish["PR_QTY"] + "'" // JOB_QTY
+                        + ",'" + drFinish["PS_CD"] + "'" // PS_CD
+                        + ",'" + drFinish["GDCD"] + "'" // NEW_GDCD
+                        + ",'" + drFinish["JOB_NO"] + "'" // PR_JOBNO
+                        + ",'" + drFinish["JOB_NO"] + "'" //JOB_NO
+                        + ",'" + drFinish["GDCD"] + "'" // GDCD
+                        + ",'" + "S" + "'" //JOB_NO
+                        + ",'1','01','Q001','R001')"; //JOB_SEQ, SA_CD, FWH_CD, TWH_CD
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1120 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1120 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                        return false;
+                    }
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+                return false;
+            }
+        }
+        private void UpdateErp()
+        {
+            //DateTime now = DateTime.Now;
+            //DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+            //{
+            //    string query = "EXEC WI_PR1123 '" + drFinish["PR_NO"] + "', 'C', '11217'";
+            //    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //    if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //    {
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP EXEC WI_PR1123 실패"));
+            //        MessageBox.Show("ERP EXEC WI_PR1123 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //    }
+            //}
+            //if (checkBoxErpOff.Checked)
+            //{
+            //    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "checkBoxErpOff.Checked = True"));
+            //    return;
+            //}
+            //{ // Update PRTR1120
+            //    string query = "UPDATE PRTR1120 SET "
+            //        //+ "PR_QTY='" + drFinish["PR_QTY"].ToString() + "'," //양품수량
+            //        + "PR_QTY='" + drFinish["COUNT_OK"].ToString() + "'," //양품수량
+            //        + "NG_QTY='" + drFinish["COUNT_NG"].ToString() + "'," //불량총수량
+            //        + "TO_DT='" + now.ToString("yyyy-MM-dd HH:mm:ss") + "'," //종료일 및 시간
+            //        + "TO_TIME='" + now.ToString("HH:mm") + "'," //종료시분
+            //        + "GD_CD='" + drFinish["GDCD"].ToString() + "',"
+            //        + "STTS='" + "S" + "'"
+            //        + " WHERE PR_NO='" + drFinish["PR_NO"].ToString() + "'";
+            //    logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //    if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //    {
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1120 업데이트 실패"));
+            //        MessageBox.Show("ERP PRTR1120 업데이트 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        return;
+            //    }
+            //    else
+            //    {
+            //        drSystem["lastChecksheetNumber"] = drFinish["checksheetNumber"].ToString();
+            //    }
+            //}
+
+            //{ // Insert PRTR1121
+            //    int ErrorIndex = 26;
+            //    if ((int)drFinish["COUNT_PW"] > 0)//파워
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E002" + "'" // NG_CD
+            //        + ",'" + drFinish["COUNT_PW"].ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    if ((int)drFinish["COUNT_CT"] > 0)//CT
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E003" + "'" // NG_CD
+            //        + ",'" + drFinish["COUNT_CT"].ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    if ((int)drFinish["COUNT_NONE"] > 0)//미분리
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E007" + "'" // NG_CD
+            //        //+ ",'" + drFinish["COUNT_NONE"].ToString() + "'" // NG_QTY
+            //        + ",'" + drFinish["COUNT_EMPTY1"].ToString() + "'" // COUNT_EMPTY1
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    if ((int)drFinish["COUNT_EDGE_BUBBLE"] > 0)//에지기포
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E008" + "'" // NG_CD
+            //        + ",'" + drFinish["COUNT_EDGE_BUBBLE"].ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    if ((int)drFinish["COUNT_DEFECT"] > 0)//파손
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E009" + "'" // NG_CD
+            //        + ",'" + drFinish["COUNT_DEFECT"].ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    if ((int)drFinish["COUNT_DK"] > 0)//뜯김
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E010" + "'" // NG_CD
+            //        + ",'" + drFinish["COUNT_DK"].ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    if ((int)drFinish["COUNT_SIL"] > 0)//실
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E011" + "'" // NG_CD
+            //        + ",'" + drFinish["COUNT_SIL"].ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    if ((int)drFinish["COUNT_UPDOWN"] > 0)//상하분리
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E012" + "'" // NG_CD
+            //        + ",'" + drFinish["COUNT_UPDOWN"].ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    //int yousilCount = (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];// + (int)drFinish["COUNT_ERROR"];
+            //    int yousilCount = (int)drFinish["COUNT_EMPTY2"];// + (int)drFinish["COUNT_ERROR"];
+            //    if (yousilCount > 0)//유실
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E013" + "'" // NG_CD
+            //        + ",'" + yousilCount.ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //    int errorCount = (int)drFinish["COUNT_ERROR"];
+            //    if (errorCount > 0)//전공정 오차
+            //    {
+            //        string query = "insert into PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+            //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+            //        + ",'" + ErrorIndex + "'" // PR_SEQ
+            //        + ",'" + "E021" + "'" // NG_CD
+            //        + ",'" + errorCount.ToString() + "'" // NG_QTY
+            //        + ",'" + "" + "')"; //REMK
+            //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionERP => " + query));
+            //        if (WriteDB(strConnectionERP, query, true, out string msg) == false)
+            //        {
+            //            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "ERP PRTR1121 업로드 실패"));
+            //            MessageBox.Show("ERP PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+            //        }
+            //        ErrorIndex++;
+            //    }
+            //}
+        }
+        private void SendLogToEES()
+        {
+            if (checkBoxEesOff.Checked)
+            {
+                logPrint(MethodBase.GetCurrentMethod().Name, "checkBoxEesOff.Checked = True");
+                return;
+            }
+            DateTime now = DateTime.Now;
+            DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+            { // Update PRTR1120
+                string query = "UPDATE ERP_TB_PRTR1120 SET "
+                    //+ "PR_QTY='" + drFinish["PR_QTY"].ToString() + "'," //양품수량
+                    + "PR_QTY='" + drFinish["COUNT_OK"].ToString() + "'," //양품수량
+                    + "NG_QTY='" + drFinish["COUNT_NG"].ToString() + "'," //불량총수량
+                    + "TO_DT='" + now.ToString("yyyy-MM-dd HH:mm:ss") + "'," //종료일 및 시간
+                    + "TO_TIME='" + now.ToString("HH:mm") + "'" //종료시분
+                                                                //+ "GD_CD='" + drFinish["GDCD"].ToString() + "',"
+                                                                //+ "STTS='" + "S" + "'"
+                    + " WHERE PR_NO='" + drFinish["PR_NO"].ToString() + "'";
+                logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                {
+                    logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1120 업데이트 실패");
+                    MessageBox.Show("EES ERP_TB_PRTR1120 업데이트 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    return;
+                }
+                else
+                {
+                    drSystem["lastChecksheetNumber"] = drFinish["checksheetNumber"].ToString();
+                }
+            }
+
+            { // Insert PRTR1121
+                int ErrorIndex = 26;
+                if ((int)drFinish["COUNT_PW"] != 0)//파워
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E002" + "'" // NG_CD
+                    + ",'" + drFinish["COUNT_PW"].ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                if ((int)drFinish["COUNT_CT"] != 0)//CT
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E003" + "'" // NG_CD
+                    + ",'" + drFinish["COUNT_CT"].ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                if ((int)drFinish["COUNT_EMPTY1"] != 0)//미분리
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E007" + "'" // NG_CD
+                    //+ ",'" + drFinish["COUNT_NONE"].ToString() + "'" // NG_QTY
+                    + ",'" + drFinish["COUNT_EMPTY1"].ToString() + "'" // COUNT_EMPTY1
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                if ((int)drFinish["COUNT_EDGE_BUBBLE"] != 0)//에지기포
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E008" + "'" // NG_CD
+                    + ",'" + drFinish["COUNT_EDGE_BUBBLE"].ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                if ((int)drFinish["COUNT_DEFECT"] != 0)//파손
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E009" + "'" // NG_CD
+                    + ",'" + drFinish["COUNT_DEFECT"].ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                if ((int)drFinish["COUNT_DK"] != 0)//뜯김
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E010" + "'" // NG_CD
+                    + ",'" + drFinish["COUNT_DK"].ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                if ((int)drFinish["COUNT_SIL"] != 0)//실
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E011" + "'" // NG_CD
+                    + ",'" + drFinish["COUNT_SIL"].ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                if ((int)drFinish["COUNT_UPDOWN"] != 0)//상하분리
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E012" + "'" // NG_CD
+                    + ",'" + drFinish["COUNT_UPDOWN"].ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                //int yousilCount = (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];// + (int)drFinish["COUNT_ERROR"];
+                int yousilCount = (int)drFinish["COUNT_EMPTY2"];// + (int)drFinish["COUNT_ERROR"];
+                if (yousilCount != 0)//유실
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E013" + "'" // NG_CD
+                    + ",'" + yousilCount.ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                int errorCount = (int)drFinish["COUNT_ERROR"];
+                if (errorCount != 0)//전공정 오차
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E021" + "'" // NG_CD
+                    + ",'" + errorCount.ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
+                //if (!checkBoxSmInspectDefectOff.Checked)
+                //{
+                //    int NG_BUBBLE_QTY = (int)drFinish["NG_BUBBLE_QTY"];
+                //    if (NG_BUBBLE_QTY != 0)//NG_BUBBLE_QTY
+                //    {
+                //        string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                //        + ",'" + ErrorIndex + "'" // PR_SEQ
+                //        + ",'" + "E025" + "'" // NG_BUBBLE_QTY
+                //        + ",'" + NG_BUBBLE_QTY.ToString() + "'" // NG_QTY
+                //        + ",'" + "" + "')"; //REMK
+                //        logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                //        if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                //        {
+                //            logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                //            MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                //        }
+                //        ErrorIndex++;
+                //    }
+                //    int NG_REACTION_QTY = (int)drFinish["NG_REACTION_QTY"];
+                //    if (NG_REACTION_QTY != 0)//NG_REACTION_QTY
+                //    {
+                //        string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                //        + ",'" + ErrorIndex + "'" // PR_SEQ
+                //        + ",'" + "E026" + "'" // NG_REACTION_QTY
+                //        + ",'" + NG_REACTION_QTY.ToString() + "'" // NG_QTY
+                //        + ",'" + "" + "')"; //REMK
+                //        logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                //        if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                //        {
+                //            logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                //            MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                //        }
+                //        ErrorIndex++;
+                //    }
+                //    int NG_PRINT_QTY = (int)drFinish["NG_PRINT_QTY"];
+                //    if (NG_PRINT_QTY != 0)//NG_PRINT_QTY
+                //    {
+                //        string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                //        + ",'" + ErrorIndex + "'" // PR_SEQ
+                //        + ",'" + "E027" + "'" // NG_PRINT_QTY
+                //        + ",'" + NG_PRINT_QTY.ToString() + "'" // NG_QTY
+                //        + ",'" + "" + "')"; //REMK
+                //        logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                //        if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                //        {
+                //            logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                //            MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                //        }
+                //        ErrorIndex++;
+                //    }
+                //    int NG_SEPARATION_QTY = (int)drFinish["NG_SEPARATION_QTY"];
+                //    if (NG_SEPARATION_QTY != 0)//NG_SEPARATION_QTY
+                //    {
+                //        string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                //        + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                //        + ",'" + ErrorIndex + "'" // PR_SEQ
+                //        + ",'" + "E028" + "'" // NG_SEPARATION_QTY
+                //        + ",'" + NG_SEPARATION_QTY.ToString() + "'" // NG_QTY
+                //        + ",'" + "" + "')"; //REMK
+                //        logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                //        if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                //        {
+                //            logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                //            MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                //        }
+                //        ErrorIndex++;
+                //    }
+                //}
+            }
+        }
+        private void GetAccessLevel(string PS_CD, out string PS_NM, out string PS_LEVEL)
+        {
+            PS_NM = "";
+            PS_LEVEL = "";
+#if DEBUG
+            PS_NM = "TEST";
+            PS_LEVEL = "ADMIN";
+#else
+            try
+            {
+                string sql = "SELECT A.USER_NAME, A.USER_LEVEL FROM COM_TB_MACHINE_ACCESS_USER A WHERE USER_ID ='" + PS_CD + "'";
+                logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + sql);
+                Class_ERPDB db = new Class_ERPDB();
+                db.ConnectDB(strConnectionEES);
+                DataTable dt = db.GetDBtable(sql);
+                db.CloseDB();
+                ///////////////////////////////////////////////////////////////////////////////////////////////
+                try
+                {
+                    PS_NM = dt.Rows[0]["USER_NAME"].ToString();
+                    PS_LEVEL = dt.Rows[0]["USER_LEVEL"].ToString();
+                    logPrint(MethodBase.GetCurrentMethod().Name, "USER_NAME = " + PS_NM + ", USER_LEVEL = " + PS_LEVEL);
+                }
+                catch
+                {
+                    logPrint(MethodBase.GetCurrentMethod().Name, "ESS USER_LEVEL 읽기 실패");
+                    MessageBox.Show("ESS USER_LEVEL 읽기 실패", MethodBase.GetCurrentMethod().Name);
+                    PS_NM = "Not Found";
+                    PS_LEVEL = "Not Found";
+                }
+            }
+            catch (Exception ex)
+            {
+                logPrint(MethodBase.GetCurrentMethod().Name, "ESS USER_LEVEL 읽기 실패");
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+                PS_NM = "Not Found";
+                PS_LEVEL = "Not Found";
+            }
+#endif
+        }
+        string currentAccessLevel = "NONE";
+        string currentAccessName = "NONE";
+        private void logPrintAccess(string where, string msg1, string msg2 = "")
+        {
+            DateTime now = DateTime.Now;
+            string path = m_settingDir + @"\logAccess\" + now.ToString("yyyy-MM");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            using (FileStream fs = File.Open(path + @"\logAccess-" + now.ToString("yyyy-MM-dd") + ".log", FileMode.Append))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    if (msg2 == "")
+                    {
+                        w.WriteLine(now.ToString("yyyy-MM-dd HH:mm:ss") + ", " + msg1.Replace("\r", " ").Replace("\n", " ") + ", " + currentAccessName + ", " + currentAccessLevel + ", " + where);
+                    }
+                    else
+                    {
+                        w.WriteLine(now.ToString("yyyy-MM-dd HH:mm:ss") + ", " + msg1.Replace("\r", " ").Replace("\n", " ") + "=" + msg2 + ", " + currentAccessName + ", " + currentAccessLevel + ", " + where);
+                    }
+                }
+            }
+        }
+        private bool WriteDB(string strConnection, string query, bool bReadUncommitted, out string msg)
+        {
+            msg = "";
+            for (int i = 0; i < 10; i++)
+            {
+                if (WriteDB_Tranjaction(strConnection, query, bReadUncommitted, out msg))
+                {
+                    logPrint(MethodBase.GetCurrentMethod().Name, msg + " => " + query);
+                    return true;
+                }
+                Thread.Sleep(100);
+            }
+            logPrint(MethodBase.GetCurrentMethod().Name, msg + " => " + query);
+            return false;
+        }
+        private bool WriteDB_Tranjaction(string strConnection, string query, bool bReadUncommitted, out string msg)
+        {
+            bool ret = false;
+            msg = "";
+            using (SqlConnection connection = new SqlConnection(strConnection))
+            {
+                try
+                {
+                    connection.Open();
+                    //lock (erpLock)
+                    {
+                        SqlTransaction sqlTran = null;
+                        if (bReadUncommitted)
+                            sqlTran = connection.BeginTransaction(IsolationLevel.ReadUncommitted);
+                        else
+                            sqlTran = connection.BeginTransaction();
+                        SqlCommand command = connection.CreateCommand();
+                        command.Transaction = sqlTran;
+                        command.CommandText = query;
+                        command.ExecuteNonQuery();
+                        try
+                        {
+                            sqlTran.Commit();
+                            ret = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            msg = ex.Message;
+                            try
+                            {
+                                sqlTran.Rollback();
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    msg = ex.Message;
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+            return ret;
+        }
+        #endregion EES_MODULE
+
+        private void buttonNewRecipe_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                logPrintAccess(MethodBase.GetCurrentMethod().Name, ((Control)sender).Text, "Click");
+                newFileDialog1.InitialDirectory = m_settingDir;
+                if (newFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    CurrentFileName = newFileDialog1.FileName;
+
+                    saveParameter(CurrentFileName, "centerParameter");
+                    saveParameter(CurrentFileName + "_b", "boundaryParameter");
+                    labelRecipe.Text = Path.GetFileNameWithoutExtension(CurrentFileName);
+                    bJobChange = true;
+                    bWorkDone = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex));
+            }
+        }
+
+        private void buttonLoadRecipe_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                logPrintAccess(MethodBase.GetCurrentMethod().Name, ((Control)sender).Text, "Click");
+                openFileDialog1.InitialDirectory = m_settingDir;
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    //내부 파라미터 읽기
+                    CurrentFileName = openFileDialog1.FileName;
+                    loadParameter(openFileDialog1.FileName, "centerParameter");
+                    //테두리 파라미터 읽기
+                    loadParameter(openFileDialog1.FileName + "_b", "boundaryParameter");
+                    labelRecipe.Text = Path.GetFileNameWithoutExtension(CurrentFileName);
+                    try
+                    {
+                        openPowerRecipeFileDialog.InitialDirectory = m_settingDir;
+                        if (openPowerRecipeFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            string filename = openPowerRecipeFileDialog.FileName;
+                            dataSetPowerRecipe.Clear();
+                            dataSetPowerRecipe.ReadXml(filename);
+                            PowerToRecipe();
+                            labelRecipePower.Text = Path.GetFileNameWithoutExtension(filename);
+                            bJobChange = true;
+                            bWorkDone = false;
+                        }
+                        else
+                        {
+                            labelRecipePower.Text = "Power Recipe 로드 되지 않음";
+                        }
+                    }
+                    catch
+                    {
+                        labelRecipePower.Text = "Power Recipe 로드 되지 않음";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex));
+            }
+        }
+
+        private void buttonSaveRecipe_Click(object sender, EventArgs e)
+        {
+            logPrintAccess(MethodBase.GetCurrentMethod().Name, ((Control)sender).Text, "Click");
+            if (bJobChange == false)
+            {
+                MessageBox.Show("레시피 파일이 로드되지 않았습니다. \n 파일을 새로 생성하거나 불러오기를 하세요.");
+                return;
+            }
+            //내부 파라미터 Apply 및 저장 기능 동시에
+            DataRow dr = dataSetBackup.Tables["centerParameter"].Rows[0];
+            try
+            {
+                dr["s1Start"] = int.Parse(textBoxCenterS1Start.Text);
+                dr["s2Start"] = int.Parse(textBoxCenterS2Start.Text);
+                dr["s3Start"] = int.Parse(textBoxCenterS3Start.Text);
+                dr["s1Count"] = int.Parse(textBoxCenterS1Count.Text);
+                dr["s2Count"] = int.Parse(textBoxCenterS2Count.Text);
+                dr["s3Count"] = int.Parse(textBoxCenterS3Count.Text);
+
+                //dr["s1Start2"] = int.Parse(textBoxCenter2S1Start.Text);
+                //dr["s1Count2"] = int.Parse(textBoxCenter2S1Count.Text);
+                //dr["s2Start2"] = int.Parse(textBoxCenter2S2Start.Text);
+                //dr["s2Count2"] = int.Parse(textBoxCenter2S2Count.Text);
+                //dr["s3Start2"] = int.Parse(textBoxCenter2S3Start.Text);
+                //dr["s3Count2"] = int.Parse(textBoxCenter2S3Count.Text);
+                //dataSetBackup.WriteXml(m_settingDir + @"\backup.xml", XmlWriteMode.WriteSchema);
+            }
+            catch
+            {
+                textBoxCenterS1Start.Text = dr["s1Start"].ToString();
+                textBoxCenterS2Start.Text = dr["s2Start"].ToString();
+                textBoxCenterS3Start.Text = dr["s3Start"].ToString();
+                textBoxCenterS1Count.Text = dr["s1Count"].ToString();
+                textBoxCenterS2Count.Text = dr["s2Count"].ToString();
+                textBoxCenterS3Count.Text = dr["s3Count"].ToString();
+
+                //textBoxCenter2S1Start.Text = dr["s1Start2"].ToString();
+                //textBoxCenter2S1Count.Text = dr["s1Count2"].ToString();
+                //textBoxCenter2S2Start.Text = dr["s2Start2"].ToString();
+                //textBoxCenter2S2Count.Text = dr["s2Count2"].ToString();
+                //textBoxCenter2S3Start.Text = dr["s3Start2"].ToString();
+                //textBoxCenter2S3Count.Text = dr["s3Count2"].ToString();
+            }
+
+            //테두리 파라미터 Apply 및 저장 기능 동시에
+
+            dr = dataSetBackup.Tables["boundaryParameter"].Rows[0];
+            try
+            {
+                dr["s1Start"] = int.Parse(textBoxBoundaryS1Start.Text);
+                dr["s2Start"] = int.Parse(textBoxBoundaryS2Start.Text);
+                dr["s3Start"] = int.Parse(textBoxBoundaryS3Start.Text);
+                dr["s1Count"] = int.Parse(textBoxBoundaryS1Count.Text);
+                dr["s2Count"] = int.Parse(textBoxBoundaryS2Count.Text);
+                dr["s3Count"] = int.Parse(textBoxBoundaryS3Count.Text);
+
+                //dr["s1Start2"] = int.Parse(textBoxBoundary2S1Start.Text);
+                //dr["s2Start2"] = int.Parse(textBoxBoundary2S2Start.Text);
+                //dr["s3Start2"] = int.Parse(textBoxBoundary2S3Start.Text);
+                //dr["s1Count2"] = int.Parse(textBoxBoundary2S1Count.Text);
+                //dr["s2Count2"] = int.Parse(textBoxBoundary2S2Count.Text);
+                //dr["s3Count2"] = int.Parse(textBoxBoundary2S3Count.Text);
+                dataSetBackup.WriteXml(m_settingDir + @"\backup.xml", XmlWriteMode.WriteSchema);
+                MessageBox.Show("레시피 저장 완료");
+            }
+            catch
+            {
+                textBoxBoundaryS1Start.Text = dr["s1Start"].ToString();
+                textBoxBoundaryS2Start.Text = dr["s2Start"].ToString();
+                textBoxBoundaryS3Start.Text = dr["s3Start"].ToString();
+                textBoxBoundaryS1Count.Text = dr["s1Count"].ToString();
+                textBoxBoundaryS2Count.Text = dr["s2Count"].ToString();
+                textBoxBoundaryS3Count.Text = dr["s3Count"].ToString();
+
+                //textBoxBoundary2S1Start.Text = dr["s1Start2"].ToString();
+                //textBoxBoundary2S2Start.Text = dr["s2Start2"].ToString();
+                //textBoxBoundary2S3Start.Text = dr["s3Start2"].ToString();
+                //textBoxBoundary2S1Count.Text = dr["s1Count2"].ToString();
+                //textBoxBoundary2S2Count.Text = dr["s2Count2"].ToString();
+                //textBoxBoundary2S3Count.Text = dr["s3Count2"].ToString();
+            }
+
+            bValueChanged = true;
+            ChangeSave();
+            try
+            {
+                newFileDialog1.InitialDirectory = m_settingDir;
+
+                saveParameter(CurrentFileName, "centerParameter");
+                saveParameter(CurrentFileName + "_b", "boundaryParameter");
+                labelRecipe.Text = Path.GetFileNameWithoutExtension(CurrentFileName);
+                //    saveFileDialog1.InitialDirectory = m_settingDir;
+                //
+                //    saveParameter(saveFileDialog1.FileName, "centerParameter");
+                //    saveParameter(saveFileDialog1.FileName + "_b", "boundaryParameter");
+                //    labelItemName.Text = Path.GetFileNameWithoutExtension(saveFileDialog1.FileName);
+                //    LoadFileNametxt.Text = Path.GetFileNameWithoutExtension(saveFileDialog1.FileName);
+            }
+            catch (Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex));
+            }
+        }
+
+        private void buttonSavePowerRecipe_Click(object sender, EventArgs e)
+        {
+            logPrintAccess(MethodBase.GetCurrentMethod().Name, ((Control)sender).Text, "Click");
+            savePowerFileDialog1.InitialDirectory = m_settingDir;
+            if (savePowerFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                dataSetPowerRecipe.Clear();
+                dataSetPowerRecipe.Tables[0].Rows.Add();
+                RecipeToPower();
+                dataSetPowerRecipe.WriteXml(savePowerFileDialog1.FileName, XmlWriteMode.WriteSchema);
+            }
+        }
+
+        private void checkBoxErp1110_Off_CheckedChanged(object sender, EventArgs e)
+        {
+            if (((CheckBox)sender).Checked) ((CheckBox)sender).BackColor = Color.Red;
+            else ((CheckBox)sender).BackColor = Color.Transparent;
+            drSystem["bErp1110_Off"] = checkBoxErp1110_Off.Checked;
+            bValueChanged = true;
+            ChangeSave();
+        }
+
+        private void checkBoxErpOff_CheckedChanged(object sender, EventArgs e)
+        {
+            if (((CheckBox)sender).Checked) ((CheckBox)sender).BackColor = Color.Red;
+            else ((CheckBox)sender).BackColor = Color.Transparent;
+            drSystem["bErpOff"] = checkBoxErpOff.Checked;
+            bValueChanged = true;
+            ChangeSave();
+        }
+
+        private void checkBoxEesOff_CheckedChanged(object sender, EventArgs e)
+        {
+            if (((CheckBox)sender).Checked) ((CheckBox)sender).BackColor = Color.Red;
+            else ((CheckBox)sender).BackColor = Color.Transparent;
+            drSystem["bEesOff"] = checkBoxEesOff.Checked;
+            bValueChanged = true;
+            ChangeSave();
+        }
+
+        private void buttonFinshLog_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                logPrintAccess(MethodBase.GetCurrentMethod().Name, ((Control)sender).Text, "Click");
+
+                //SaveLog();
+                //SendLogToEES();
+                //deleteResult(false);
+                deleteResult();
+                textBoxLotNumber.Enabled = true;
+                bWorkDone = true;
+                //tabControlCamParameter.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+            }
+        }
+
+        private void buttonCopyTable_Click(object sender, EventArgs e)
+        {
+              logPrintAccess(MethodBase.GetCurrentMethod().Name, ((Control)sender).Text, "Click");
+            string lottStartTime = dataSetBackup.Tables["fixedBackup"].Rows[0]["lotStartTime"].ToString();
+            string lotFinishTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+            CopyTable(lottStartTime, lotFinishTime);
+        }
     }
 
     public class LuCamSnapshotCallback0 : IlucamCOMSnapshotCallback
@@ -3824,6 +5714,8 @@ namespace IptVisionLucam
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr PostMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
     }
     #endregion "importDll"
 }
