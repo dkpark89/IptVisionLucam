@@ -281,7 +281,7 @@ namespace IptVisionLucam
                     //labelSen1.InvokeIfNeeded(() => labelSen1.Text = "자외선차이=" + centerTest[id].UvDiff1.ToString() + "/" + centerTest[id].UvDiff2.ToString() + " [" + centerTest[id].C1 + "/" + centerTest[id].C2 + "/" + centerTest[id].C3 + "]");
                     string str = "(" + StageIndex + "/12)";
                     labelSen1.InvokeIfNeeded(() => labelSen1.Text = str + " [" + centerTest[id].C1 + "/" + centerTest[id].C2 + "/" + centerTest[id].C3 + "]");
-                    PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + drCounter["cntOk"].ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
+                    PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + drCounter["count"].ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
                     DataRow dr = dataSetBackup.Tables["centerParameter"].Rows[0];
                     PutText(ref cvBufferCam[id], "diffTh=" + dr["diffTh"].ToString() + "/colorIn=" + dr["colorInner"].ToString() + "/colorOut" + dr["colorOuter"].ToString(), false, 30, 60);
                     PutText(ref cvBufferCam[id], dr["colorUnderprint"].ToString() + "/" + dr["lumDiffTh"].ToString() + "/" + dr["devTh"].ToString(), false, 30, 90);
@@ -291,18 +291,18 @@ namespace IptVisionLucam
                     PutText(ref cvBufferCam[id], Properties.Resources.VERSION, false, 30, 210);
                     if (!bDemo)
                     {
-                        cvBufferCam[id].SaveImage(m_tempDir + @"\Org1-" + ((int)drCounter["cntOk"]).ToString("000000") + ".jpg");
+                        cvBufferCam[id].SaveImage(m_tempDir + @"\Org1-" + ((int)drCounter["count"]).ToString("000000") + ".jpg");
                         try
                         {
-                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + ((int)drCounter["cntOk"]).ToString("000000") + ".jpg");
+                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + ((int)drCounter["count"]).ToString("000000") + ".jpg");
                         }
                         catch (InvalidOperationException)
                         {
                             Thread.Sleep(100);
-                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + ((int)drCounter["cntOk"]).ToString("000000") + ".jpg");
+                            centerTest[id].ResultBitmap.Save(m_tempDir + @"\Res1-" + ((int)drCounter["count"]).ToString("000000") + ".jpg");
                         }
                         pictureBoxCam1.InvokeIfNeeded(() => pictureBoxCam1.Image = iu.resizeImage(cvBufferCam[id], pictureBoxCam1.Size));
-                        pictureBoxResult1.Tag = (int)drCounter["cntOk"];
+                        pictureBoxResult1.Tag = (int)drCounter["count"];
                     }
                     else
                     {
@@ -407,7 +407,7 @@ namespace IptVisionLucam
                         string str = "(" + index + "/12)";
                         //labelSen2.InvokeIfNeeded(() => labelSen2.Text = "[" + boundaryTest[id - 1].C1 + "/" + boundaryTest[id - 1].C2 + "/" + boundaryTest[id - 1].C3 + "][" + boundaryTest[id - 1].RoundDiff.ToString("0") + "]");
                         labelSen2.InvokeIfNeeded(() => labelSen2.Text = str + "[" + boundaryTest[id - 1].C1 + "/" + boundaryTest[id - 1].C2 + "/" + boundaryTest[id - 1].C3 + "][" + boundaryTest[id - 1].RoundDiff.ToString("0") + "]");
-                        PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + drCounter["cntOk"].ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
+                        PutText(ref cvBufferCam[id], "M#=" + dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString() + ", id=" + (id + 1).ToString() + ", cnt=" + drCounter["count"].ToString() + ", status=" + eStatusCam[id].ToString(), true, 30, 30);
 
                         DataRow dr = dataSetBackup.Tables["boundaryParameter"].Rows[0];
                         PutText(ref cvBufferCam[id], dr["cannyParameter1"].ToString() + "/" + dr["cannyParameter2"].ToString() + "/" + dr["diffTh"].ToString(), false, 30, 60);
@@ -416,17 +416,17 @@ namespace IptVisionLucam
                         PutText(ref cvBufferCam[id], Properties.Resources.VERSION, false, 30, 150);
                         if (!bDemo)
                         {
-                            cvBufferCam[id].SaveImage(m_tempDir + @"\Org2-" + ((int)drCounter["cntOk"] - 2).ToString("000000") + ".jpg");
+                            cvBufferCam[id].SaveImage(m_tempDir + @"\Org2-" + ((int)drCounter["count"] - 2).ToString("000000") + ".jpg");
                             try
                             {
-                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + ((int)drCounter["cntOk"] - 2).ToString("000000") + ".jpg");
+                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + ((int)drCounter["count"] - 2).ToString("000000") + ".jpg");
                             }
                             catch (InvalidOperationException)
                             {
                                 Thread.Sleep(100);
-                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + ((int)drCounter["cntOk"] - 2).ToString("000000") + ".jpg");
+                                boundaryTest[id - 1].ResultBitmap.Save(m_tempDir + @"\Res2-" + ((int)drCounter["count"] - 2).ToString("000000") + ".jpg");
                             }
-                            pictureBoxResult2.Tag = (int)((int)drCounter["cntOk"] - 2);
+                            pictureBoxResult2.Tag = (int)((int)drCounter["count"] - 2);
                         }
                         else
                         {
@@ -725,7 +725,7 @@ namespace IptVisionLucam
             try
             {
                 string strCode = "";
-                int cntAllIndex = (int)drCounter["cntOk"];
+                int cntAllIndex = (int)drCounter["count"];
                 try
                 {
                     int p1 = 0, p2 = 0, aa, bb;
@@ -2604,7 +2604,7 @@ namespace IptVisionLucam
                 dr = dataSetBackup.Tables["boundaryParameter"].Rows[0];
                 loadBaundaryParameter(ref dr);
 
-                buttonCapture.Text = "[측정 시작(" + drCounter["cntOk"].ToString() + ")]";
+                buttonCapture.Text = "[측정 시작(" + drCounter["count"].ToString() + ")]";
 
                 //textBoxOkIndex.Text = pictureBoxPalette.GetOkIndex().ToString();
                 //textBoxPaletteIndex.Text = pictureBoxPalette.GetPaletteIndex().ToString();
@@ -2886,7 +2886,7 @@ namespace IptVisionLucam
                 logPrint("", "");
                 //dataSetBackup.Tables["fixedBackup"].Rows[0]["debug"] = bDebug;
                 //dataSetBackup.Tables["fixedBackup"].Rows[0]["mode"] = "Master";
-                if ((int)drCounter["cntOk"] == 0)
+                if ((int)drCounter["count"] == 0)
                 {
                     File.Delete(m_tempDir + @"\tempData.xml");
                 }
@@ -3469,7 +3469,7 @@ namespace IptVisionLucam
         private string psCd = "";
         private void buttonLotChange_Click(object sender, EventArgs e)
         {
-            if (previousLotNumber.Equals(textBoxLotNumber.Text) == false && (int)drCounter["cntOk"] != 0)
+            if (previousLotNumber.Equals(textBoxLotNumber.Text) == false && (int)drCounter["count"] != 0)
             {
                 if (MessageBox.Show("결과 삭제가 되지않은 상태로 로트번호 입력이 되었습니다.\n 계속 진행 합니까?", "경고", MessageBoxButtons.YesNo) == DialogResult.No)
                 {
