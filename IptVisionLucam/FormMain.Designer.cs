@@ -35,6 +35,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabControlView = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.checkBoxImageServerOff = new System.Windows.Forms.CheckBox();
             this.checkBoxErp1110_Off = new System.Windows.Forms.CheckBox();
             this.checkBoxEesOff = new System.Windows.Forms.CheckBox();
             this.checkBoxErpOff = new System.Windows.Forms.CheckBox();
@@ -221,6 +222,10 @@
             this.dataColumn118 = new System.Data.DataColumn();
             this.dataColumn119 = new System.Data.DataColumn();
             this.dataColumn132 = new System.Data.DataColumn();
+            this.dataColumn151 = new System.Data.DataColumn();
+            this.dataColumn152 = new System.Data.DataColumn();
+            this.dataColumn153 = new System.Data.DataColumn();
+            this.dataColumn154 = new System.Data.DataColumn();
             this.dataTable6 = new System.Data.DataTable();
             this.dataColumn26 = new System.Data.DataColumn();
             this.dataColumn27 = new System.Data.DataColumn();
@@ -375,6 +380,7 @@
             this.newFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.savePowerFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPowerRecipeFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.labelPlc = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.tabControlView.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -465,6 +471,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.checkBoxImageServerOff);
             this.tabPage1.Controls.Add(this.checkBoxErp1110_Off);
             this.tabPage1.Controls.Add(this.checkBoxEesOff);
             this.tabPage1.Controls.Add(this.checkBoxErpOff);
@@ -494,6 +501,18 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "설정";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxImageServerOff
+            // 
+            this.checkBoxImageServerOff.AutoSize = true;
+            this.checkBoxImageServerOff.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.checkBoxImageServerOff.Location = new System.Drawing.Point(414, 488);
+            this.checkBoxImageServerOff.Name = "checkBoxImageServerOff";
+            this.checkBoxImageServerOff.Size = new System.Drawing.Size(111, 16);
+            this.checkBoxImageServerOff.TabIndex = 229;
+            this.checkBoxImageServerOff.Text = "이미지서버 OFF";
+            this.checkBoxImageServerOff.UseVisualStyleBackColor = true;
+            this.checkBoxImageServerOff.CheckedChanged += new System.EventHandler(this.checkBoxImageServerOff_CheckedChanged);
             // 
             // checkBoxErp1110_Off
             // 
@@ -1709,7 +1728,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1256, 659);
+            this.tabPage2.Size = new System.Drawing.Size(1256, 630);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "강제업로드";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -1860,6 +1879,7 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.labelPlc);
             this.panel2.Controls.Add(this.userControlStatus1);
             this.panel2.Controls.Add(this.labelResult2);
             this.panel2.Controls.Add(this.labelResult1);
@@ -2224,7 +2244,11 @@
             this.dataColumn117,
             this.dataColumn118,
             this.dataColumn119,
-            this.dataColumn132});
+            this.dataColumn132,
+            this.dataColumn151,
+            this.dataColumn152,
+            this.dataColumn153,
+            this.dataColumn154});
             this.dataTable3.TableName = "fixedBackup";
             // 
             // dataColumn2
@@ -2359,13 +2383,36 @@
             // 
             this.dataColumn119.ColumnName = "bErp1110_Off";
             this.dataColumn119.DataType = typeof(bool);
-            this.dataColumn119.DefaultValue = "True";
+            this.dataColumn119.DefaultValue = true;
             // 
             // dataColumn132
             // 
             this.dataColumn132.ColumnName = "bUseNetwork";
             this.dataColumn132.DataType = typeof(bool);
             this.dataColumn132.DefaultValue = true;
+            // 
+            // dataColumn151
+            // 
+            this.dataColumn151.ColumnName = "plcAddress1";
+            this.dataColumn151.DefaultValue = "192.0.1.3";
+            // 
+            // dataColumn152
+            // 
+            this.dataColumn152.ColumnName = "plcPortnumber";
+            this.dataColumn152.DataType = typeof(int);
+            this.dataColumn152.DefaultValue = 4050;
+            // 
+            // dataColumn153
+            // 
+            this.dataColumn153.ColumnName = "bLogSendToPlc";
+            this.dataColumn153.DataType = typeof(bool);
+            this.dataColumn153.DefaultValue = true;
+            // 
+            // dataColumn154
+            // 
+            this.dataColumn154.ColumnName = "bImageServer_Off";
+            this.dataColumn154.DataType = typeof(bool);
+            this.dataColumn154.DefaultValue = true;
             // 
             // dataTable6
             // 
@@ -3396,6 +3443,18 @@
             this.openPowerRecipeFileDialog.FileName = "openFileDialog1";
             this.openPowerRecipeFileDialog.Filter = "파워 파라미터 파일|*.pow";
             // 
+            // labelPlc
+            // 
+            this.labelPlc.AutoSize = true;
+            this.labelPlc.BackColor = System.Drawing.Color.Yellow;
+            this.labelPlc.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.labelPlc.Font = new System.Drawing.Font("Verdana", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelPlc.Location = new System.Drawing.Point(578, 7);
+            this.labelPlc.Name = "labelPlc";
+            this.labelPlc.Size = new System.Drawing.Size(32, 15);
+            this.labelPlc.TabIndex = 228;
+            this.labelPlc.Text = "PLC";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -3837,6 +3896,12 @@
         private System.Windows.Forms.CheckBox checkBoxEesOff;
         private System.Windows.Forms.CheckBox checkBoxErpOff;
         private System.Data.DataColumn dataColumn132;
+        private System.Windows.Forms.CheckBox checkBoxImageServerOff;
+        private System.Data.DataColumn dataColumn151;
+        private System.Data.DataColumn dataColumn152;
+        private System.Data.DataColumn dataColumn153;
+        private System.Data.DataColumn dataColumn154;
+        private System.Windows.Forms.Label labelPlc;
     }
 }
 

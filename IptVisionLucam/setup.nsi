@@ -7,13 +7,14 @@
 # If you change the names "app.exe", "logo.ico", or "license.rtf" you should do a search and replace - they
 # show up in a few places.
 # All the other settings can be tweaked by editing the !defines at the top of this script
+Unicode True
 !define APPNAME "IptVisionLucam"
 !define COMPANYNAME "Imageprotech"
 !define DESCRIPTION "분리 검사 소프트웨어"
 # These three must be integers
 !define VERSIONMAJOR 1
 !define VERSIONMINOR 2
-!define VERSIONBUILD 1-test4
+!define VERSIONBUILD 1-test6
 # These will be displayed by the "Click here for support information" link in "Add/Remove Programs"
 # It is possible to use "mailto:" links in here to open the email client
 !define HELPURL "http://..." # "Support Information" link

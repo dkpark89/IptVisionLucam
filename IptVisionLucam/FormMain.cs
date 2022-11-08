@@ -4,6 +4,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -120,7 +122,194 @@ namespace IptVisionLucam
         const string strConnectionERP = @"Data Source=192.168.2.5;Initial Catalog=ERP_2;Persist Security Info=True;User ID=sa;Password=inter07@";
         //const string strConnectionEES = @"Data Source=192.168.2.203;Initial Catalog=InterojoSmartEES;Persist Security Info=True;User ID=sa;Password=fntps!250";
         const string strConnectionEES = @"Data Source=192.168.2.203;Initial Catalog=InterojoSmartEES;Persist Security Info=True;User ID=micube;Password=EES#%DB!@";
-
+        public UdpClient[] clientUDP = new UdpClient[2] { null, null };
+        private IPEndPoint[] plcEndPoint = new IPEndPoint[2] { null, null };
+        private Thread[] threadQuery = new Thread[2] { null, null };
+        bool[] bConnection = new bool[2] { true, true };
+        //ConcurrentQueue<byte[]>[] testQ = new ConcurrentQueue<byte[]>[2] { new ConcurrentQueue<byte[]>(), new ConcurrentQueue<byte[]>() };
+        private void connections()
+        {
+            int plcPortnumber = (int)drSystem["plcPortnumber"];
+            labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Red);
+            for (int ch = 0; ch < clientUDP.Length; ch++)
+            {
+                try
+                {
+                    plcEndPoint[ch] = new IPEndPoint(IPAddress.Parse(drSystem["plcAddress1"].ToString()), plcPortnumber + ch);
+                    clientUDP[ch] = new UdpClient(plcPortnumber + ch);
+                    clientUDP[ch].Client.SendTimeout = 1000;
+                    clientUDP[ch].Client.ReceiveTimeout = 1000;
+                    //threadQuery[ch] = new Thread(new ParameterizedThreadStart(ThreadPlcReadQuery));
+                    //threadQuery[ch].Start(ch);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+            }
+            labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Green);
+            //SendCheckSheetNo();
+        }
+        private void closeConnection()
+        {
+            for (int ch = 0; ch < clientUDP.Length; ch++)
+            {
+                try
+                {
+                    if (threadQuery[ch] != null) threadQuery[ch].Abort();
+                }
+                catch { }
+            }
+            Thread.Sleep(300);
+            for (int ch = 0; ch < clientUDP.Length; ch++)
+            {
+                try
+                {
+                    if (clientUDP[ch] != null) clientUDP[ch].Close();
+                }
+                catch { }
+            }
+        }
+        private void SendLotStart()
+        {
+            SendM(1, 1993, true);
+        }
+        private void SendLotEnd()
+        {
+            SendM(1, 1994, true);
+        }
+        private void SendCheckSheetNo()
+        {
+            SendStringD(1, 4500, drSystem["lotNumber"].ToString());//Check Sheet No.1
+        }
+        void SendM(int ch, int address, bool value)
+        {
+            byte[] data = MitubishPLC.BatchWriteBitTypeA1E("M" + address, value);
+            try
+            {
+                byte[] sendData = data;
+                //testQ[ch].TryDequeue(out sendData);
+                //testQ[ch].TryDequeue(out byte[] sendData);
+                try
+                {
+                    clientUDP[ch].Send(sendData, sendData.Length, plcEndPoint[ch]);
+                    byte[] buffer = clientUDP[ch].Receive(ref plcEndPoint[ch]);
+                }
+                catch (Exception ex)
+                {
+                    //testQ[ch].Enqueue(sendData);
+                    bConnection[ch] = false;
+                    if (labelPlc.BackColor != Color.Red)
+                    {
+                        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(s3)", ex));
+                        labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Red);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                bConnection[ch] = false;
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", ex));
+            }
+            SaveSendToPlc("M" + address, value ? 1 : 0);
+        }
+        void SendStringD(int ch, int address, string value)
+        {
+            byte[] data = MitubishPLC.WriteStringWord_TypeA1E("D" + address, value, 10);
+            try
+            {
+                byte[] sendData = data;
+                //testQ[ch].TryDequeue(out sendData);
+                //testQ[ch].TryDequeue(out byte[] sendData);
+                try
+                {
+                    clientUDP[ch].Send(sendData, sendData.Length, plcEndPoint[ch]);
+                    byte[] buffer = clientUDP[ch].Receive(ref plcEndPoint[ch]);
+                }
+                catch (Exception ex)
+                {
+                    //testQ[ch].Enqueue(sendData);
+                    bConnection[ch] = false;
+                    if (labelPlc.BackColor != Color.Red)
+                    {
+                        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(s3)", ex));
+                        labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Red);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                bConnection[ch] = false;
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", ex));
+            }
+            SaveSendToPlc("D" + address, value);
+        }
+        object objSendToPlc = new object();
+        private void SaveSendToPlc(string address, int value)
+        {
+            if (false == (bool)drSystem["bLogSendToPlc"]) return;
+            DateTime now = DateTime.Now;
+            string lotNumber = textBoxLotNumber.Text;
+            string path = m_settingDir + @"\logSendToPlc\log-" + DateTime.Now.ToString("yyyy-MM");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string filename = path + @"\sendToPlc-" + DateTime.Now.ToString("yyyy-MM-dd") + ".csv";
+            bool bExistFile = File.Exists(filename);
+            using (FileStream fs = File.Open(filename, FileMode.Append))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    DataColumnCollection dcc = dataSetFinish.Tables[0].Columns;
+                    lock (objSendToPlc)
+                    {
+                        if (bExistFile == false)
+                        {
+                            string header = "time,LotNumber,address,data(int), data(bin)";
+                            w.WriteLine(header);
+                        }
+                        {
+                            string data = now.ToString("HH:mm:ss.fff") + "," + lotNumber + "," + address + "," + value + ","
+                                + "0b" + Convert.ToString(value, 2).PadLeft(16, '0');
+                            w.WriteLine(data);
+                        }
+                    }
+                }
+            }
+        }
+        private void SaveSendToPlc(string address, string value)
+        {
+            if (false == (bool)drSystem["bLogSendToPlc"]) return;
+            DateTime now = DateTime.Now;
+            string lotNumber = textBoxLotNumber.Text;
+            string path = m_settingDir + @"\logSendToPlc\log-" + DateTime.Now.ToString("yyyy-MM");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string filename = path + @"\sendToPlc-" + DateTime.Now.ToString("yyyy-MM-dd") + ".csv";
+            bool bExistFile = File.Exists(filename);
+            using (FileStream fs = File.Open(filename, FileMode.Append))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    DataColumnCollection dcc = dataSetFinish.Tables[0].Columns;
+                    lock (objSendToPlc)
+                    {
+                        if (bExistFile == false)
+                        {
+                            string header = "time,LotNumber,address,data(int), data(bin)";
+                            w.WriteLine(header);
+                        }
+                        {
+                            string data = now.ToString("HH:mm:ss.fff") + "," + lotNumber + "," + address + "," + value + ",is string";
+                            w.WriteLine(data);
+                        }
+                    }
+                }
+            }
+        }
 
         #region "ThreadCode"
         Queue<Dictionary<string, object>> upLoadQueue = new Queue<Dictionary<string, object>>();
@@ -2281,14 +2470,14 @@ namespace IptVisionLucam
                                 statusStrip1.InvokeIfNeeded(() => labelMessage.Text += "[잔량 배출 수신]");
                                 logPrint(MethodBase.GetCurrentMethod().Name, @"[7.잔량 배출 수신]");
                                 //pictureBoxPalette.SetSignal(MyPaletteBox.signalCode.PUT_PALETTE);
-                                if (upLoadQueue.Count > 0)
-                                {
-                                    MessageBox.Show("업로드 되지않은 데이터가 있습니다. 확인 바랍니다.");
-                                }
-                                if (MessageBox.Show("잔량 배출 수신 처리 하겠습니까?", "잔량 배출", MessageBoxButtons.YesNo) == DialogResult.No)
-                                {
-                                    return;
-                                }
+                                //if (upLoadQueue.Count > 0)
+                                //{
+                                //    MessageBox.Show("업로드 되지않은 데이터가 있습니다. 확인 바랍니다.");
+                                //}
+                                //if (MessageBox.Show("잔량 배출 수신 처리 하겠습니까?", "잔량 배출", MessageBoxButtons.YesNo) == DialogResult.No)
+                                //{
+                                //    return;
+                                //}
                                 okProcess(-1, -1, -1, -1);
                                 wLotFinish();
                                 break;
@@ -2420,6 +2609,7 @@ namespace IptVisionLucam
                     checkBoxErpOff.Checked = (bool)drSystem["bErpOff"];
                     checkBoxEesOff.Checked = (bool)drSystem["bEesOff"];
                     checkBoxErp1110_Off.Checked = (bool)drSystem["bErp1110_Off"];
+                    checkBoxImageServerOff.Checked = (bool)drSystem["bImageServer_Off"];
                     bUseNetwork = (bool)drSystem["bUseNetwork"];
                 }
                 catch (Exception ex)
@@ -2818,48 +3008,7 @@ namespace IptVisionLucam
             }
             catch { }
         }
-        private void connections()
-        {
-            //int plcPortnumber = (int)drSystem["plcPortnumber"];
-            //labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Red);
-            //for (int ch = 0; ch < clientUDP.Length; ch++)
-            //{
-            //    try
-            //    {
-            //        plcEndPoint[ch] = new IPEndPoint(IPAddress.Parse(drSystem["plcAddress1"].ToString()), plcPortnumber + ch);
-            //        clientUDP[ch] = new UdpClient(plcPortnumber + ch);
-            //        clientUDP[ch].Client.SendTimeout = 1000;
-            //        clientUDP[ch].Client.ReceiveTimeout = 1000;
-            //        threadQuery[ch] = new Thread(new ParameterizedThreadStart(ThreadPlcReadQuery));
-            //        threadQuery[ch].Start(ch);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        MessageBox.Show(ex.ToString());
-            //    }
-            //}
-            //labelPlc.InvokeIfNeeded(() => labelPlc.BackColor = Color.Green);
-        }
-        private void closeConnection()
-        {
-            //for (int ch = 0; ch < clientUDP.Length; ch++)
-            //{
-            //    try
-            //    {
-            //        if (threadQuery[ch] != null) threadQuery[ch].Abort();
-            //    }
-            //    catch { }
-            //}
-            //Thread.Sleep(300);
-            //for (int ch = 0; ch < clientUDP.Length; ch++)
-            //{
-            //    try
-            //    {
-            //        if (clientUDP[ch] != null) clientUDP[ch].Close();
-            //    }
-            //    catch { }
-            //}
-        }
+       
         private void FormMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (bAdvIO)
@@ -3666,8 +3815,11 @@ namespace IptVisionLucam
             {
                 try
                 {
-                    System.IO.Directory.CreateDirectory(m_uploadDir + @"\images\" + textBoxLotNumber.Text);
-                    if (Directory.Exists(m_uploadDir + @"\images\" + textBoxLotNumber.Text) == false)
+                    if (checkBoxImageServerOff.Checked == false)
+                    {
+                        System.IO.Directory.CreateDirectory(m_uploadDir + @"\images\" + textBoxLotNumber.Text);
+                    }
+                    if (!checkBoxImageServerOff.Checked && Directory.Exists(m_uploadDir + @"\images\" + textBoxLotNumber.Text) == false)
                     {
                         bUpload = false;
                         labelNet.Text = "네트웤 이상";
@@ -3680,10 +3832,13 @@ namespace IptVisionLucam
                         string strTest = dataSetBackup.Tables["fixedBackup"].Rows[0]["machineCode"].ToString();
                         string desFilename = m_resultDir + @"\" + textBoxLotNumber.Text + @"\ID.txt";
                         string netFilename = m_uploadDir + @"\images\" + textBoxLotNumber.Text + @"\ID.txt";
-                        StreamWriter SWrite = new StreamWriter(desFilename, false, System.Text.Encoding.ASCII);
-                        SWrite.WriteLine(strTest);
-                        SWrite.WriteLine("1");
-                        SWrite.Close();
+                        if (checkBoxImageServerOff.Checked == false)
+                        {
+                            StreamWriter SWrite = new StreamWriter(desFilename, false, System.Text.Encoding.ASCII);
+                            SWrite.WriteLine(strTest);
+                            SWrite.WriteLine("1");
+                            SWrite.Close();
+                        }
                         try
                         {
 #region MES
@@ -3699,7 +3854,7 @@ namespace IptVisionLucam
                                 }
                                 else
                                 {
-                                    //if (bUseNetwork)
+                                    if (bUseNetwork)
                                     {
 #if !DEBUG
                                         if(GetProjectNo(out string PR_NO))
@@ -3715,8 +3870,8 @@ namespace IptVisionLucam
                                                 return;
                                             }
                                             dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
-                                            //SendCheckSheetNo();
-                                            //SendLotStart();
+                                            SendCheckSheetNo();
+                                            SendLotStart();
                                         }
                                         else
                                         {
@@ -3731,11 +3886,21 @@ namespace IptVisionLucam
                                     }
                                 }
                             }
-#endregion
-                            System.IO.File.Copy(desFilename, netFilename, true);
-                            bUpload = true;
-                            labelNet.Text = "네트웤 준비 완료";
-                            labelNet.BackColor = Color.Transparent;
+                            #endregion
+                            if (checkBoxImageServerOff.Checked == false)
+                            {
+                                System.IO.File.Copy(desFilename, netFilename, true);
+                                bUpload = true;
+                                labelNet.Text = "네트웤 준비 완료";
+                                labelNet.BackColor = Color.Transparent;
+                            }
+                            else
+                            {
+                                bUpload = false;
+                                labelNet.Text = "네트웤 저장 않음";
+                                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", labelNet.Text));
+                                labelNet.BackColor = Color.Yellow;
+                            }
                             panelResultBase.BackColor = Color.LimeGreen;
                             SetReady(true);
                         }
@@ -5631,6 +5796,14 @@ namespace IptVisionLucam
             ChangeSave();
         }
 
+        private void checkBoxImageServerOff_CheckedChanged(object sender, EventArgs e)
+        {
+            if (((CheckBox)sender).Checked) ((CheckBox)sender).BackColor = Color.Red;
+            else ((CheckBox)sender).BackColor = Color.Transparent;
+            drSystem["bImageServer_Off"] = checkBoxImageServerOff.Checked;
+            bValueChanged = true;
+            ChangeSave();
+        }
         private void buttonFinshLog_Click(object sender, EventArgs e)
         {
             try
@@ -5658,6 +5831,7 @@ namespace IptVisionLucam
             string lotFinishTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
             CopyTable(lottStartTime, lotFinishTime);
         }
+
     }
 
     public class LuCamSnapshotCallback0 : IlucamCOMSnapshotCallback
