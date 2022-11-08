@@ -4558,40 +4558,40 @@ namespace IptVisionLucam
             }
         }
         #region EES_MODULE
-        private bool GetSmInspectDefect(string lotNumber, out int PR_QTY, out int NG_BUBBLE_QTY, out int NG_REACTION_QTY, out int NG_PRINT_QTY, out int NG_SEPARATION_QTY)
-        {
-            PR_QTY = 0;
-            NG_BUBBLE_QTY = 0;
-            NG_REACTION_QTY = 0;
-            NG_PRINT_QTY = 0;
-            NG_SEPARATION_QTY = 0;
-            try
-            {
-                ///////////////////////////////////////////////////////////////////////////////////////////////
-                string sql = dataSetBackup.Tables["sql"].Rows[0]["SmInspectDefect"].ToString() + " '" + lotNumber + "'";
-                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + sql));
-                Class_ERPDB db = new Class_ERPDB();
-                db.ConnectDB(strConnectionEES);
-                DataTable dt = db.GetDBtable(sql);
-                db.CloseDB();
-                dt.TableName = "SmInspectDefect";
-                ///////////////////////////////////////////////////////////////////////////////////////////////
-                dt.WriteXml(m_settingDir + @"\SmInspectDefect.xml", XmlWriteMode.WriteSchema);
-                DataRow drErp = dt.Rows[0];
-                PR_QTY = (int)(double.Parse(drErp["PR_QTY"].ToString()) + 0.5);
-                NG_BUBBLE_QTY = (int)(double.Parse(drErp["NG_BUBBLE_QTY"].ToString()) + 0.5);
-                NG_REACTION_QTY = (int)(double.Parse(drErp["NG_REACTION_QTY"].ToString()) + 0.5);
-                NG_PRINT_QTY = (int)(double.Parse(drErp["NG_PRINT_QTY"].ToString()) + 0.5);
-                NG_SEPARATION_QTY = (int)(double.Parse(drErp["NG_SEPARATION_QTY"].ToString()) + 0.5);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
-                MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
-                return false;
-            }
-        }
+        //private bool GetSmInspectDefect(string lotNumber, out int PR_QTY, out int NG_BUBBLE_QTY, out int NG_REACTION_QTY, out int NG_PRINT_QTY, out int NG_SEPARATION_QTY)
+        //{
+        //    PR_QTY = 0;
+        //    NG_BUBBLE_QTY = 0;
+        //    NG_REACTION_QTY = 0;
+        //    NG_PRINT_QTY = 0;
+        //    NG_SEPARATION_QTY = 0;
+        //    try
+        //    {
+        //        ///////////////////////////////////////////////////////////////////////////////////////////////
+        //        string sql = dataSetBackup.Tables["sql"].Rows[0]["SmInspectDefect"].ToString() + " '" + lotNumber + "'";
+        //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + sql));
+        //        Class_ERPDB db = new Class_ERPDB();
+        //        db.ConnectDB(strConnectionEES);
+        //        DataTable dt = db.GetDBtable(sql);
+        //        db.CloseDB();
+        //        dt.TableName = "SmInspectDefect";
+        //        ///////////////////////////////////////////////////////////////////////////////////////////////
+        //        dt.WriteXml(m_settingDir + @"\SmInspectDefect.xml", XmlWriteMode.WriteSchema);
+        //        DataRow drErp = dt.Rows[0];
+        //        PR_QTY = (int)(double.Parse(drErp["PR_QTY"].ToString()) + 0.5);
+        //        NG_BUBBLE_QTY = (int)(double.Parse(drErp["NG_BUBBLE_QTY"].ToString()) + 0.5);
+        //        NG_REACTION_QTY = (int)(double.Parse(drErp["NG_REACTION_QTY"].ToString()) + 0.5);
+        //        NG_PRINT_QTY = (int)(double.Parse(drErp["NG_PRINT_QTY"].ToString()) + 0.5);
+        //        NG_SEPARATION_QTY = (int)(double.Parse(drErp["NG_SEPARATION_QTY"].ToString()) + 0.5);
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
+        //        MessageBox.Show(ex.Message, MethodBase.GetCurrentMethod().Name);
+        //        return false;
+        //    }
+        //}
         private bool GetUseUV(string lotNumber, out bool bUV)
         {
             bUV = true;
