@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="VERSION" xml:space="preserve">
-    <value>Version 1.2.1 (2022.11.08)-test6</value>
+    <value>Version 1.2.1 (2022.11.17)-test9</value>
   </data>
 </root>

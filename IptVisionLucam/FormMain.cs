@@ -1307,7 +1307,7 @@ namespace IptVisionLucam
         {
             lock (lockObject)
             {
-                string path = m_resultDir + @"\log-" + DateTime.Now.ToString("yyyy-MM");
+                string path = m_settingDir + @"\log-" + DateTime.Now.ToString("yyyy-MM");
                 if (Directory.Exists(path) == false)
                 {
                     Directory.CreateDirectory(path);
@@ -2393,11 +2393,12 @@ namespace IptVisionLucam
                         {
                             MessageBox.Show("업로드 되지않은 데이터가 있습니다. 확인 바랍니다.");
                         }
-                        if (MessageBox.Show("잔량 배출 수신 처리 하겠습니까?", "잔량 배출", MessageBoxButtons.YesNo) == DialogResult.No)
-                        {
-                            return;
-                        }
+                        //if (MessageBox.Show("잔량 배출 수신 처리 하겠습니까?", "잔량 배출", MessageBoxButtons.YesNo) == DialogResult.No)
+                        //{
+                        //    return;
+                        //}
                         okProcess(-1, -1, -1, -1);
+                        wLotFinish();
                         break;
                 }
             }
@@ -2606,7 +2607,7 @@ namespace IptVisionLucam
                     System.IO.Directory.CreateDirectory(m_resultDir);
                     bAdvIO = (bool)dr["bAdvIO"];
                     bResizing = (bool)dr["bResizing"];
-                    checkBoxErpOff.Checked = (bool)drSystem["bErpOff"];
+                    checkBoxErpOff.Checked = true;// (bool)drSystem["bErpOff"];
                     checkBoxEesOff.Checked = (bool)drSystem["bEesOff"];
                     checkBoxErp1110_Off.Checked = (bool)drSystem["bErp1110_Off"];
                     checkBoxImageServerOff.Checked = (bool)drSystem["bImageServer_Off"];
@@ -2780,12 +2781,14 @@ namespace IptVisionLucam
                     {
                         try
                         {
+                            string portName = drSystem["serialPort"].ToString();
+                            serialPortIptPLC1.PortName = portName;
                             serialPortIptPLC1.Open();
-                            labelMessage.Text += "[COM1 초기화 완료]";
+                            labelMessage.Text += "[" + portName + " 초기화 완료]";
                         }
-                        catch
+                        catch (Exception ex)
                         {
-                            MessageBox.Show("COM1 초기화 실패");
+                            MessageBox.Show(ex.Message);
                         }
                     }
                 }
@@ -2837,7 +2840,7 @@ namespace IptVisionLucam
             }
             try
             {
-                dataSetFinish.ReadXml(m_tempDir + @"\finish.xml", XmlReadMode.ReadSchema);
+                dataSetFinish.ReadXml(m_settingDir + @"\finish.xml", XmlReadMode.ReadSchema);
             }
             catch
             {
@@ -3048,6 +3051,7 @@ namespace IptVisionLucam
                 {
                     //pictureBoxPalette.SaveBackup(m_tempDir + @"\paletteBackup.xml");
                     dataSetOkNg.WriteXml(m_tempDir + @"\OkNgList.xml", XmlWriteMode.WriteSchema);
+                    //dataSetFinish.WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
                     //dataSetTempData.Tables["tempBackup"].Rows.Clear();
                     //DataRow drTemp = dataSetTempData.Tables["tempBackup"].NewRow();
                     //drTemp["eStatusPrevMaster0"] = eStatusPrevMaster[0];
@@ -3664,11 +3668,19 @@ namespace IptVisionLucam
                     }
                     drFinish["PS_CD"] = dlg.PsCd;
                 }
-                if (GetSachulSaengSanSilJuk(textBoxLotNumber.Text) == false)
+                if ((int)drCounter["count"] == 0)
                 {
-                    SetReady(false);
-                    //MessageBox.Show("사출생산실적 없음");
-                    return;
+                    if (GetSachulSaengSanSilJuk(textBoxLotNumber.Text) == false)
+                    {
+                        SetReady(false);
+                        //MessageBox.Show("사출생산실적 없음");
+                        return;
+                    }
+                }
+                else
+                {
+                    logPrint(MethodBase.GetCurrentMethod().Name + "(2)", "생산중인 제품이므로 분리지시 확인을 하지 않았습니다.");
+                    //MessageBox.Show("생산중인 제품이므로 분리지시 확인을 하지 않았습니다.");
                 }
                 if (GetUseUV(textBoxLotNumber.Text, out bool bUV) == false)
                 {
@@ -3872,6 +3884,7 @@ namespace IptVisionLucam
                                             dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
                                             SendCheckSheetNo();
                                             SendLotStart();
+                                            logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(2)", "생산 실적 등록 성공"));
                                         }
                                         else
                                         {
