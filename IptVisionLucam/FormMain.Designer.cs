@@ -382,6 +382,12 @@
             this.newFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.savePowerFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPowerRecipeFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.dataColumn143 = new System.Data.DataColumn();
+            this.dataColumn144 = new System.Data.DataColumn();
+            this.dataColumn148 = new System.Data.DataColumn();
+            this.dataColumn149 = new System.Data.DataColumn();
+            this.dataColumn150 = new System.Data.DataColumn();
+            this.dataColumn155 = new System.Data.DataColumn();
             this.panel1.SuspendLayout();
             this.tabControlView.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -602,7 +608,7 @@
             this.labelNM_PW.Font = new System.Drawing.Font("Gulim", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.labelNM_PW.Location = new System.Drawing.Point(10, 446);
             this.labelNM_PW.Name = "labelNM_PW";
-            this.labelNM_PW.Size = new System.Drawing.Size(101, 16);
+            this.labelNM_PW.Size = new System.Drawing.Size(100, 16);
             this.labelNM_PW.TabIndex = 122;
             this.labelNM_PW.Text = "NAME / PW";
             // 
@@ -638,7 +644,7 @@
             this.label19.Font = new System.Drawing.Font("Dotum", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.label19.Location = new System.Drawing.Point(115, 529);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(156, 16);
+            this.label19.Size = new System.Drawing.Size(155, 16);
             this.label19.TabIndex = 119;
             this.label19.Text = "※ 레시피 파일이름";
             // 
@@ -2265,7 +2271,13 @@
             this.dataColumn152,
             this.dataColumn153,
             this.dataColumn154,
-            this.dataColumn142});
+            this.dataColumn142,
+            this.dataColumn143,
+            this.dataColumn144,
+            this.dataColumn148,
+            this.dataColumn149,
+            this.dataColumn150,
+            this.dataColumn155});
             this.dataTable3.TableName = "fixedBackup";
             // 
             // dataColumn2
@@ -3465,6 +3477,36 @@
             this.openPowerRecipeFileDialog.FileName = "openFileDialog1";
             this.openPowerRecipeFileDialog.Filter = "파워 파라미터 파일|*.pow";
             // 
+            // dataColumn143
+            // 
+            this.dataColumn143.ColumnName = "addrPlcQty";
+            this.dataColumn143.DefaultValue = "D3000";
+            // 
+            // dataColumn144
+            // 
+            this.dataColumn144.ColumnName = "addrPlcOk";
+            this.dataColumn144.DefaultValue = "D3000";
+            // 
+            // dataColumn148
+            // 
+            this.dataColumn148.ColumnName = "addrPlcNg";
+            this.dataColumn148.DefaultValue = "D3000";
+            // 
+            // dataColumn149
+            // 
+            this.dataColumn149.ColumnName = "addrPlcMibun1";
+            this.dataColumn149.DefaultValue = "D3000";
+            // 
+            // dataColumn150
+            // 
+            this.dataColumn150.ColumnName = "addrPlcMiBunUpDown";
+            this.dataColumn150.DefaultValue = "D3002";
+            // 
+            // dataColumn155
+            // 
+            this.dataColumn155.ColumnName = "addrPlcMiBun2";
+            this.dataColumn155.DefaultValue = "D3004";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -3913,6 +3955,12 @@
         private System.Data.DataColumn dataColumn154;
         private System.Windows.Forms.Label labelPlc;
         private System.Data.DataColumn dataColumn142;
+        private System.Data.DataColumn dataColumn143;
+        private System.Data.DataColumn dataColumn144;
+        private System.Data.DataColumn dataColumn148;
+        private System.Data.DataColumn dataColumn149;
+        private System.Data.DataColumn dataColumn150;
+        private System.Data.DataColumn dataColumn155;
     }
 }
 

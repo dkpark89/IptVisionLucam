@@ -2907,30 +2907,34 @@ namespace IptVisionLucam
                     while (!bClosing)
                     {
                         Thread.Sleep(100);
-                        //if (bInFinish == false && clientUDP[1] != null)
-                        if (bInFinish == false)
+                        if (bInFinish == false && clientUDP[1] != null)
+                        //if (bInFinish == false)
                         {
-                            //string[] address = new string[3] { drSystem["addrPlcQty"].ToString(), drSystem["addrPlcOk"].ToString(), drSystem["addrPlcNg"].ToString() };
-                            //int[] D = new int[address.Length];
-                            //byte[] sendData = MitubishPLC.RandomReadWordTypeQnA3E(address);
+                            string[] address = new string[6] { drSystem["addrPlcQty"].ToString(), drSystem["addrPlcOk"].ToString(), drSystem["addrPlcNg"].ToString(),
+                                                               drSystem["addrPlcMibun1"].ToString(), drSystem["addrPlcMiBunUpDown"].ToString(), drSystem["addrPlcMiBun2"].ToString() };
+                            int[] D = new int[address.Length];
+                            byte[] sendData = MitubishPLC.RandomReadWordTypeQnA3E(address);
                             try
                             {
-                                //clientUDP[1].Send(sendData, sendData.Length, plcEndPoint[1]);
-                                //byte[] buffer = clientUDP[1].Receive(ref plcEndPoint[1]);
-                                //if (buffer[0] == 0xd0)
+                                clientUDP[1].Send(sendData, sendData.Length, plcEndPoint[1]);
+                                byte[] buffer = clientUDP[1].Receive(ref plcEndPoint[1]);
+                                if (buffer[0] == 0xd0)
                                 {
-                                    //int headPos = 11;
-                                    //for (int i = 0; i < address.Length; i++)
-                                    //{
-                                    //    int value1 = buffer[headPos];
-                                    //    headPos++;
-                                    //    int value2 = buffer[headPos];
-                                    //    headPos++;
-                                    //    D[i] = (Int16)(value1 + (value2 << 8));
-                                    //}
-                                    //countPlcQty = D[0];
-                                    //countPlcOk = D[1];
-                                    //countplcNg = D[2];
+                                    int headPos = 11;
+                                    for (int i = 0; i < address.Length; i++)
+                                    {
+                                        int value1 = buffer[headPos];
+                                        headPos++;
+                                        int value2 = buffer[headPos];
+                                        headPos++;
+                                        D[i] = (Int16)(value1 + (value2 << 8));
+                                    }
+                                    drCounter["DisplayNG_Empty1"] = D[3];
+                                    drCounter["DisplayNG_Empty2"] = D[5];
+                                    countPlcQty = D[0];
+                                    countPlcOk = D[1];
+                                    countplcNg = D[2];
+                                    countUpDown = D[4];
                                     SafeNativeMethods.PostMessage(mainHandle, (uint)UWM.UPDATE_DATASET_FINISH, IntPtr.Zero, IntPtr.Zero);
                                     //DataRow dr = dataSetFinish.Tables[0].Rows[0];
                                     //int countError = (int)dr["PR_QTY"] - countPlcQty;
@@ -4421,16 +4425,17 @@ namespace IptVisionLucam
                 drFinish["COUNT_PW"] = 0;// (int)drCounter["DisplayNG_PW"];//파워 (이 장비에는 없음)
                 drFinish["COUNT_CT"] = (int)drCounter["DisplayNG_CT"];//CT
                 drFinish["COUNT_EMPTY1"] = (int)drCounter["DisplayNG_Empty1"];//유실
+                drFinish["COUNT_UPDOWN"] = countUpDown;
                 drFinish["COUNT_EMPTY2"] = (int)drCounter["DisplayNG_Empty2"];//유실
-                int countNg = (int)drFinish["COUNT_NONE"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"]
+                int countNg = (int)drFinish["COUNT_UPDOWN"] + (int)drFinish["COUNT_NONE"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"]
                     + (int)drFinish["COUNT_DK"] + (int)drFinish["COUNT_SIL"] + (int)drFinish["COUNT_PW"] + (int)drFinish["COUNT_CT"]
                     + (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];
                 int countError = (int)drFinish["PR_QTY"] - (int)drFinish["COUNT_OK"] - countNg;
                 drFinish["COUNT_ERROR"] = countError; //전공정오차
                 drFinish["COUNT_NG"] = countNg + countError;
-                drFinish["plcQty"] = 0;// countPlcQty;
-                drFinish["plcOk"] = 0;// countPlcOk;
-                drFinish["plcNg"] = 0;// countplcNg;
+                drFinish["plcQty"] = countPlcQty;
+                drFinish["plcOk"] = countPlcOk;
+                drFinish["plcNg"] = countplcNg;
                 dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
             }
             catch { }
@@ -5521,6 +5526,11 @@ namespace IptVisionLucam
         }
         string currentAccessLevel = "NONE";
         string currentAccessName = "NONE";
+        private object countPlcQty;
+        private object countPlcOk;
+        private object countplcNg;
+        private object countUpDown;
+
         private void logPrintAccess(string where, string msg1, string msg2 = "")
         {
             DateTime now = DateTime.Now;
