@@ -3696,8 +3696,16 @@ namespace IptVisionLucam
                 }
                 catch
                 {
-                    string[] _pw = PW.Split(',');
-                    pw = double.Parse(_pw[0]); // 다촛점 렌즈의 경우 첫번째 파워값을 획득
+                    try
+                    {
+                        string[] _pw = PW.Split(',');
+                        pw = double.Parse(_pw[0]); // 다촛점 렌즈의 경우 첫번째 파워값을 획득
+                    }
+                    catch
+                    {
+                        logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name + "(POWER)", PW));
+                        pw = 0;
+                    }
                 }
                 string name_power = "";
                 if (pw > -1.0)
@@ -4401,27 +4409,31 @@ namespace IptVisionLucam
 
         private void UdpateDataSetFinish()
         {
-            DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
-            drFinish["COUNT_OK"] = (int)drCounter["cntOk"];
-            drFinish["COUNT_NONE"] = (int)drCounter["DisplayNG_None"];//미분리
-            drFinish["COUNT_EDGE_BUBBLE"] = (int)drCounter["DisplayNG_Bubble"];//에지기포
-            drFinish["COUNT_DEFECT"] = (int)drCounter["DisplayNG_Defeat"];//파손
-            drFinish["COUNT_DK"] = (int)drCounter["DisplayNG_DK"];//뜯김
-            drFinish["COUNT_SIL"] = (int)drCounter["DisplayNG_Sil"];//실
-            drFinish["COUNT_PW"] = 0;// (int)drCounter["DisplayNG_PW"];//파워 (이 장비에는 없음)
-            drFinish["COUNT_CT"] = (int)drCounter["DisplayNG_CT"];//CT
-            drFinish["COUNT_EMPTY1"] = (int)drCounter["DisplayNG_Empty1"];//유실
-            drFinish["COUNT_EMPTY2"] = (int)drCounter["DisplayNG_Empty2"];//유실
-            int countNg = (int)drFinish["COUNT_NONE"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"]
-                + (int)drFinish["COUNT_DK"] + (int)drFinish["COUNT_SIL"] + (int)drFinish["COUNT_PW"] + (int)drFinish["COUNT_CT"]
-                + (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];
-            int countError = (int)drFinish["PR_QTY"] - (int)drFinish["COUNT_OK"] - countNg;
-            drFinish["COUNT_ERROR"] = countError; //전공정오차
-            drFinish["COUNT_NG"] = countNg + countError;
-            drFinish["plcQty"] = 0;// countPlcQty;
-            drFinish["plcOk"] = 0;// countPlcOk;
-            drFinish["plcNg"] = 0;// countplcNg;
-            dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
+            try
+            {
+                DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
+                drFinish["COUNT_OK"] = (int)drCounter["cntOk"];
+                drFinish["COUNT_NONE"] = (int)drCounter["DisplayNG_None"];//미분리
+                drFinish["COUNT_EDGE_BUBBLE"] = (int)drCounter["DisplayNG_Bubble"];//에지기포
+                drFinish["COUNT_DEFECT"] = (int)drCounter["DisplayNG_Defeat"];//파손
+                drFinish["COUNT_DK"] = (int)drCounter["DisplayNG_DK"];//뜯김
+                drFinish["COUNT_SIL"] = (int)drCounter["DisplayNG_Sil"];//실
+                drFinish["COUNT_PW"] = 0;// (int)drCounter["DisplayNG_PW"];//파워 (이 장비에는 없음)
+                drFinish["COUNT_CT"] = (int)drCounter["DisplayNG_CT"];//CT
+                drFinish["COUNT_EMPTY1"] = (int)drCounter["DisplayNG_Empty1"];//유실
+                drFinish["COUNT_EMPTY2"] = (int)drCounter["DisplayNG_Empty2"];//유실
+                int countNg = (int)drFinish["COUNT_NONE"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"]
+                    + (int)drFinish["COUNT_DK"] + (int)drFinish["COUNT_SIL"] + (int)drFinish["COUNT_PW"] + (int)drFinish["COUNT_CT"]
+                    + (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];
+                int countError = (int)drFinish["PR_QTY"] - (int)drFinish["COUNT_OK"] - countNg;
+                drFinish["COUNT_ERROR"] = countError; //전공정오차
+                drFinish["COUNT_NG"] = countNg + countError;
+                drFinish["plcQty"] = 0;// countPlcQty;
+                drFinish["plcOk"] = 0;// countPlcOk;
+                drFinish["plcNg"] = 0;// countplcNg;
+                dataSetFinish.Tables[0].WriteXml(m_settingDir + @"\finish.xml", XmlWriteMode.WriteSchema);
+            }
+            catch { }
         }
 
         private void timer500msOneShot_Tick(object sender, EventArgs e)
