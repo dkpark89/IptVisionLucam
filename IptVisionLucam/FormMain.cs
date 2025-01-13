@@ -2910,8 +2910,7 @@ namespace IptVisionLucam
                         if (bInFinish == false && clientUDP[1] != null)
                         //if (bInFinish == false)
                         {
-                            string[] address = new string[6] { drSystem["addrPlcQty"].ToString(), drSystem["addrPlcOk"].ToString(), drSystem["addrPlcNg"].ToString(),
-                                                               drSystem["addrPlcMibun1"].ToString(), drSystem["addrPlcMiBunUpDown"].ToString(), drSystem["addrPlcMiBun2"].ToString() };
+                            string[] address = new string[3] { drSystem["addrPlcMoldTuip"].ToString(), drSystem["addrPlcMiBunUpDown"].ToString(), drSystem["addrPlcMiBun2"].ToString() };
                             int[] D = new int[address.Length];
                             byte[] sendData = MitubishPLC.RandomReadWordTypeQnA3E(address);
                             try
@@ -2929,12 +2928,10 @@ namespace IptVisionLucam
                                         headPos++;
                                         D[i] = (Int16)(value1 + (value2 << 8));
                                     }
-                                    drCounter["DisplayNG_Empty1"] = D[3];
-                                    drCounter["DisplayNG_Empty2"] = D[5];
+                                    //drCounter["DisplayNG_Empty1"] = D[3];
                                     countPlcQty = D[0];
-                                    countPlcOk = D[1];
-                                    countplcNg = D[2];
-                                    countUpDown = D[4];
+                                    countUpDown = D[1];
+                                    drCounter["DisplayNG_Empty2"] = D[2];
                                     SafeNativeMethods.PostMessage(mainHandle, (uint)UWM.UPDATE_DATASET_FINISH, IntPtr.Zero, IntPtr.Zero);
                                     //DataRow dr = dataSetFinish.Tables[0].Rows[0];
                                     //int countError = (int)dr["PR_QTY"] - countPlcQty;
@@ -4417,7 +4414,7 @@ namespace IptVisionLucam
             {
                 DataRow drFinish = dataSetFinish.Tables[0].Rows[0];
                 drFinish["COUNT_OK"] = (int)drCounter["cntOk"];
-                drFinish["COUNT_NONE"] = (int)drCounter["DisplayNG_None"];//미분리
+                drFinish["COUNT_NONE"] = (int)drCounter["DisplayNG_None"];//미분리 -> 비전측정불량
                 drFinish["COUNT_EDGE_BUBBLE"] = (int)drCounter["DisplayNG_Bubble"];//에지기포
                 drFinish["COUNT_DEFECT"] = (int)drCounter["DisplayNG_Defeat"];//파손
                 drFinish["COUNT_DK"] = (int)drCounter["DisplayNG_DK"];//뜯김
@@ -4430,7 +4427,8 @@ namespace IptVisionLucam
                 int countNg = (int)drFinish["COUNT_UPDOWN"] + (int)drFinish["COUNT_NONE"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"]
                     + (int)drFinish["COUNT_DK"] + (int)drFinish["COUNT_SIL"] + (int)drFinish["COUNT_PW"] + (int)drFinish["COUNT_CT"]
                     + (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];
-                int countError = (int)drFinish["PR_QTY"] - (int)drFinish["COUNT_OK"] - countNg;
+//                int countError = (int)drFinish["PR_QTY"] - (int)drFinish["COUNT_OK"] - countNg;
+                int countError = (int)drFinish["PR_QTY"] - countPlcQty;
                 drFinish["COUNT_ERROR"] = countError; //전공정오차
                 drFinish["COUNT_NG"] = countNg + countError;
                 drFinish["plcQty"] = countPlcQty;
@@ -5411,6 +5409,23 @@ namespace IptVisionLucam
                     }
                     ErrorIndex++;
                 }
+                int noneCount = (int)drFinish["COUNT_NONE"];
+                if (noneCount != 0)//비전측정불량
+                {
+                    string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
+                    + "'" + drFinish["PR_NO"] + "'" // PR_NO
+                    + ",'" + ErrorIndex + "'" // PR_SEQ
+                    + ",'" + "E030" + "'" // NG_CD (AM:비전측정불량)
+                    + ",'" + noneCount.ToString() + "'" // NG_QTY
+                    + ",'" + "" + "')"; //REMK
+                    logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
+                    if (WriteDB(strConnectionEES, query, true, out string msg) == false)
+                    {
+                        logPrint(MethodBase.GetCurrentMethod().Name, "EES ERP_TB_PRTR1121 업로드 실패");
+                        MessageBox.Show("EES ERP_TB_PRTR1121 업로드 실패\n\n" + msg, MethodBase.GetCurrentMethod().Name);
+                    }
+                    ErrorIndex++;
+                }
                 //if (!checkBoxSmInspectDefectOff.Checked)
                 //{
                 //    int NG_BUBBLE_QTY = (int)drFinish["NG_BUBBLE_QTY"];
@@ -5526,10 +5541,10 @@ namespace IptVisionLucam
         }
         string currentAccessLevel = "NONE";
         string currentAccessName = "NONE";
-        private object countPlcQty;
-        private object countPlcOk;
-        private object countplcNg;
-        private object countUpDown;
+        private int countPlcQty;
+        private int countPlcOk;
+        private int countplcNg;
+        private int countUpDown;
 
         private void logPrintAccess(string where, string msg1, string msg2 = "")
         {

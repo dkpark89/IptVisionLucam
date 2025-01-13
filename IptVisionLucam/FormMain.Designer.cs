@@ -228,6 +228,9 @@
             this.dataColumn153 = new System.Data.DataColumn();
             this.dataColumn154 = new System.Data.DataColumn();
             this.dataColumn142 = new System.Data.DataColumn();
+            this.dataColumn143 = new System.Data.DataColumn();
+            this.dataColumn150 = new System.Data.DataColumn();
+            this.dataColumn155 = new System.Data.DataColumn();
             this.dataTable6 = new System.Data.DataTable();
             this.dataColumn26 = new System.Data.DataColumn();
             this.dataColumn27 = new System.Data.DataColumn();
@@ -382,12 +385,6 @@
             this.newFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.savePowerFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPowerRecipeFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.dataColumn143 = new System.Data.DataColumn();
-            this.dataColumn144 = new System.Data.DataColumn();
-            this.dataColumn148 = new System.Data.DataColumn();
-            this.dataColumn149 = new System.Data.DataColumn();
-            this.dataColumn150 = new System.Data.DataColumn();
-            this.dataColumn155 = new System.Data.DataColumn();
             this.panel1.SuspendLayout();
             this.tabControlView.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -2273,9 +2270,6 @@
             this.dataColumn154,
             this.dataColumn142,
             this.dataColumn143,
-            this.dataColumn144,
-            this.dataColumn148,
-            this.dataColumn149,
             this.dataColumn150,
             this.dataColumn155});
             this.dataTable3.TableName = "fixedBackup";
@@ -2447,6 +2441,21 @@
             // 
             this.dataColumn142.ColumnName = "serialPort";
             this.dataColumn142.DefaultValue = "COM1";
+            // 
+            // dataColumn143
+            // 
+            this.dataColumn143.ColumnName = "addrPlcMoldTuip";
+            this.dataColumn143.DefaultValue = "D3000";
+            // 
+            // dataColumn150
+            // 
+            this.dataColumn150.ColumnName = "addrPlcMiBunUpDown";
+            this.dataColumn150.DefaultValue = "D3002";
+            // 
+            // dataColumn155
+            // 
+            this.dataColumn155.ColumnName = "addrPlcMiBun2";
+            this.dataColumn155.DefaultValue = "D3004";
             // 
             // dataTable6
             // 
@@ -3324,7 +3333,7 @@
             // 
             // dataColumn110
             // 
-            this.dataColumn110.Caption = "사용안함";
+            this.dataColumn110.Caption = "비전측정불량";
             this.dataColumn110.ColumnName = "COUNT_NONE";
             this.dataColumn110.DataType = typeof(int);
             this.dataColumn110.DefaultValue = 0;
@@ -3476,36 +3485,6 @@
             // 
             this.openPowerRecipeFileDialog.FileName = "openFileDialog1";
             this.openPowerRecipeFileDialog.Filter = "파워 파라미터 파일|*.pow";
-            // 
-            // dataColumn143
-            // 
-            this.dataColumn143.ColumnName = "addrPlcQty";
-            this.dataColumn143.DefaultValue = "D3000";
-            // 
-            // dataColumn144
-            // 
-            this.dataColumn144.ColumnName = "addrPlcOk";
-            this.dataColumn144.DefaultValue = "D3000";
-            // 
-            // dataColumn148
-            // 
-            this.dataColumn148.ColumnName = "addrPlcNg";
-            this.dataColumn148.DefaultValue = "D3000";
-            // 
-            // dataColumn149
-            // 
-            this.dataColumn149.ColumnName = "addrPlcMibun1";
-            this.dataColumn149.DefaultValue = "D3000";
-            // 
-            // dataColumn150
-            // 
-            this.dataColumn150.ColumnName = "addrPlcMiBunUpDown";
-            this.dataColumn150.DefaultValue = "D3002";
-            // 
-            // dataColumn155
-            // 
-            this.dataColumn155.ColumnName = "addrPlcMiBun2";
-            this.dataColumn155.DefaultValue = "D3004";
             // 
             // FormMain
             // 
@@ -3955,12 +3934,9 @@
         private System.Data.DataColumn dataColumn154;
         private System.Windows.Forms.Label labelPlc;
         private System.Data.DataColumn dataColumn142;
-        private System.Data.DataColumn dataColumn143;
-        private System.Data.DataColumn dataColumn144;
-        private System.Data.DataColumn dataColumn148;
-        private System.Data.DataColumn dataColumn149;
         private System.Data.DataColumn dataColumn150;
         private System.Data.DataColumn dataColumn155;
+        private System.Data.DataColumn dataColumn143;
     }
 }
 
