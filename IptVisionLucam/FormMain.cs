@@ -4421,9 +4421,9 @@ namespace IptVisionLucam
                 drFinish["COUNT_SIL"] = (int)drCounter["DisplayNG_Sil"];//실
                 drFinish["COUNT_PW"] = 0;// (int)drCounter["DisplayNG_PW"];//파워 (이 장비에는 없음)
                 drFinish["COUNT_CT"] = (int)drCounter["DisplayNG_CT"];//CT
-                drFinish["COUNT_EMPTY1"] = (int)drCounter["DisplayNG_Empty1"];//유실
+                drFinish["COUNT_EMPTY1"] = (int)drCounter["DisplayNG_Empty2"];//미분리
                 drFinish["COUNT_UPDOWN"] = countUpDown;
-                drFinish["COUNT_EMPTY2"] = (int)drCounter["DisplayNG_Empty2"];//유실
+                drFinish["COUNT_EMPTY2"] = (int)drCounter["DisplayNG_Empty1"];//유실
                 int countNg = (int)drFinish["COUNT_UPDOWN"] + (int)drFinish["COUNT_NONE"] + (int)drFinish["COUNT_EDGE_BUBBLE"] + (int)drFinish["COUNT_DEFECT"]
                     + (int)drFinish["COUNT_DK"] + (int)drFinish["COUNT_SIL"] + (int)drFinish["COUNT_PW"] + (int)drFinish["COUNT_CT"]
                     + (int)drFinish["COUNT_EMPTY1"] + (int)drFinish["COUNT_EMPTY2"];
