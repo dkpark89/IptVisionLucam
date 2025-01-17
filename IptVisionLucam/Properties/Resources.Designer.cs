@@ -61,7 +61,7 @@ namespace IptVisionLucam.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Version 1.2.4 (2025.01.14).
+        ///   Looks up a localized string similar to Version 1.2.5 (2025.01.14).
         /// </summary>
         internal static string VERSION {
             get {

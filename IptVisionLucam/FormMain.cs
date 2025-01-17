@@ -5415,7 +5415,7 @@ namespace IptVisionLucam
                     string query = "insert into ERP_TB_PRTR1121 (PR_NO, PR_SEQ, NG_CD, NG_QTY, REMK) values("
                     + "'" + drFinish["PR_NO"] + "'" // PR_NO
                     + ",'" + ErrorIndex + "'" // PR_SEQ
-                    + ",'" + "E030" + "'" // NG_CD (AM:비전측정불량)
+                    + ",'" + "E052" + "'" // NG_CD (AM:비전측정불량)
                     + ",'" + noneCount.ToString() + "'" // NG_QTY
                     + ",'" + "" + "')"; //REMK
                     logPrint(MethodBase.GetCurrentMethod().Name, "strConnectionEES => " + query);
