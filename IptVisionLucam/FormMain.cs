@@ -1528,46 +1528,53 @@ namespace IptVisionLucam
         }
         private void SaveLog()
         {
-            DateTime now = DateTime.Now;
-            string lotStartTime = dataSetBackup.Tables["fixedBackup"].Rows[0]["lotStartTime"].ToString();
-            string lotFinishTime = now.ToString("yyyy-MM-dd HH:mm");
-            CopyTable(lotStartTime, lotFinishTime);
-            string path = m_settingDir + @"\logFinish\log-" + now.ToString("yyyy-MM");
-            if (!Directory.Exists(path))
+            try
             {
-                Directory.CreateDirectory(path);
-            }
-            string filename = path + @"\finish-" + now.ToString("yyyy-MM-dd") + ".csv";
-            bool bExistFile = File.Exists(filename);
-            using (FileStream fs = File.Open(filename, FileMode.Append))
-            {
-                using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
+                DateTime now = DateTime.Now;
+                string lotStartTime = dataSetBackup.Tables["fixedBackup"].Rows[0]["lotStartTime"].ToString();
+                string lotFinishTime = now.ToString("yyyy-MM-dd HH:mm");
+                CopyTable(lotStartTime, lotFinishTime);
+                string path = m_settingDir + @"\logFinish\log-" + now.ToString("yyyy-MM");
+                if (!Directory.Exists(path))
                 {
-                    DataColumnCollection dcc = dataSetFinish.Tables[0].Columns;
-                    if (bExistFile == false)
+                    Directory.CreateDirectory(path);
+                }
+                string filename = path + @"\finish-" + now.ToString("yyyy-MM-dd") + ".csv";
+                bool bExistFile = File.Exists(filename);
+                using (FileStream fs = File.Open(filename, FileMode.Append))
+                {
+                    using (StreamWriter w = new StreamWriter(fs, Encoding.UTF8))
                     {
-                        string header = "시작,마감";
-                        foreach (DataColumn v in dcc)
+                        DataColumnCollection dcc = dataSetFinish.Tables[0].Columns;
+                        if (bExistFile == false)
                         {
-                            header += ("," + v.Caption);
-                        }
-                        w.WriteLine(header);
-                    }
-                    {
-                        string data = lotStartTime + "," + lotFinishTime;
-                        DataRow dr = dataSetFinish.Tables[0].Rows[0];
-                        for (int i = 0; i < dcc.Count; i++)
-                        {
-                            string value = dr[i].ToString();
-                            if (value.Contains(","))
+                            string header = "시작,마감";
+                            foreach (DataColumn v in dcc)
                             {
-                                value = "\"" + value + "\"";
+                                header += ("," + v.Caption);
                             }
-                            data += ("," + value);
+                            w.WriteLine(header);
                         }
-                        w.WriteLine(data);
+                        {
+                            string data = lotStartTime + "," + lotFinishTime;
+                            DataRow dr = dataSetFinish.Tables[0].Rows[0];
+                            for (int i = 0; i < dcc.Count; i++)
+                            {
+                                string value = dr[i].ToString();
+                                if (value.Contains(","))
+                                {
+                                    value = "\"" + value + "\"";
+                                }
+                                data += ("," + value);
+                            }
+                            w.WriteLine(data);
+                        }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, ex.Message));
             }
         }
         private void printRemainedUpload()
