@@ -1456,10 +1456,24 @@ namespace IptVisionLucam
             {
                 logPrint(this, new LogArgs(MethodBase.GetCurrentMethod().Name, "wLotFinish (시작)"));
                 Thread.Sleep(3000);
-                string srcTxtName = m_tempDir + @"\" + drSystem["lotNumber"].ToString() + ".txt";
-                string netCompleteName = m_uploadDir + @"\completed\" + drSystem["lotNumber"].ToString() + @".txt";
-                string netListName = m_uploadDir + @"\resultList\" + drSystem["lotNumber"].ToString() + @".txt";
-                if ((bool)drCounter["bUpload"])
+
+                //string srcTxtName = m_tempDir + @"\" + drSystem["lotNumber"].ToString() + ".txt";
+                //string netCompleteName = m_uploadDir + @"\completed\" + drSystem["lotNumber"].ToString() + @".txt";
+                //string netListName = m_uploadDir + @"\resultList\" + drSystem["lotNumber"].ToString() + @".txt";
+                string lotNumber = "";
+                try
+                {
+                    lotNumber = drSystem["lotNumber"].ToString();
+                }
+                catch
+                {
+                    lotNumber = textBoxLotNumber.Text;
+                }
+                string srcTxtName = Path.Combine(m_tempDir, lotNumber + ".txt");
+                string netCompleteName = Path.Combine(m_uploadDir, "completed", lotNumber + ".txt");
+                string netListName = Path.Combine(m_uploadDir, "resultList", lotNumber + ".txt");
+                //if ((bool)drCounter["bUpload"])
+                if (Convert.ToBoolean(drCounter["bUpload"])) // 안전한 변환
                 {
                     if (File.Exists(srcTxtName))
                     {
